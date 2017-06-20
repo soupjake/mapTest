@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MapTest</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="default_info_title">MapTest</string>
+    <string name="default_info_snippet">Info Snippet</string>
+    <string name="pick_place">Pick Place</string>
+</resources>
