@@ -181,8 +181,6 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         progressValue = progress;
-
-
                     }
 
                     @Override
@@ -632,6 +630,7 @@ public class MapsActivity extends AppCompatActivity
         protected void onPostExecute(Weather weather) {
             super.onPostExecute(weather);
 
+
             Log.i(TAG, "Weather and Forecast loaded successfully!");
             //Reset forecast Seekbar to 0 and size to forecastVec if changed
             if (mSeekForecast.getProgress() != 0){
@@ -639,7 +638,7 @@ public class MapsActivity extends AppCompatActivity
             }
 
             //Set forecast seekbar max to size of forecast vector
-            mSeekForecast.setMax(forecastVec.size());
+            mSeekForecast.setMax(forecastVec.size() - 1);
         }
 
     }
@@ -670,16 +669,16 @@ public class MapsActivity extends AppCompatActivity
         //Change time to friendly format
         int timeInt = Integer.parseInt(time);
 
-        if(timeInt < 12) {
+        if(timeInt == 0) {
+            timeInt += 12;
+            time = (timeInt + "am");
+        } else if (timeInt < 12){
             time = (timeInt + "am");
         } else if (timeInt == 12) {
             time = (timeInt + "pm");
-        } else if (timeInt < 24){
+        } else {
             timeInt -= 12;
             time = (timeInt + "pm");
-        } else {
-            timeInt -= 24;
-            time = (timeInt + "am");
         }
 
         //Combine for rearranged date UK format
