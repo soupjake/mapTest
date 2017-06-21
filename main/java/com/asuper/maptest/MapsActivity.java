@@ -1,10 +1,9 @@
 package com.asuper.maptest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.icu.text.DateFormat;
-import android.icu.text.SimpleDateFormat;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,25 +12,28 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -108,9 +110,12 @@ public class MapsActivity extends AppCompatActivity
     private LatLng[] mLikelyPlaceLatLngs = new LatLng[mMaxEntries];
 
     //UI variables
-    private PlaceAutocompleteFragment mAutocompleteFragment;
+    private Toolbar mToolbar;
+    private Button mSearchButton;
+    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+    private AutocompleteFilter mCountryFilter;
+    private Button mLocationButton;
     private SeekBar mSeekForecast;
-    private FloatingActionButton mLocationButton;
     private FloatingActionButton mOverlayButton;
     private TextView mConditionText;
     private TextView mTempText;
@@ -130,6 +135,7 @@ public class MapsActivity extends AppCompatActivity
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
 
+
         // Build the Play services client for use by the Fused Location Provider and the Places API.
         // Use the addApi() method to request the Google Places API and the Fused Location Provider.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -142,32 +148,27 @@ public class MapsActivity extends AppCompatActivity
                 .build();
         mGoogleApiClient.connect();
 
-        //Assign IDs to UI elements
-        mAutocompleteFragment = (PlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(R.id.mAutocompleteFragment);
+        //Set up toolbar
+        mToolbar = (Toolbar) findViewById(R.id.mToolbar);
+        setSupportActionBar(mToolbar);
 
-        mAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        mSearchButton = (Button) findViewById(R.id.mSearchButton);
+
+        mSearchButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onPlaceSelected(Place place) {
-                //Set place Lat and Lon of place to location and lat/lon variables
-                LatLng placeLatLng = place.getLatLng();
-                lat = placeLatLng.latitude;
-                lon = placeLatLng.longitude;
-                mLocation.setLatitude(lat);
-                mLocation.setLongitude(lon);
+            public void onClick(View v) {
+                try {
+                    Intent intent =
+                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                                    .setFilter(mCountryFilter)
+                                    .build(MapsActivity.this);
+                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
 
-                //update map's location to place location
-                updateLocationUI();
-
-                //get weather for place
-                String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
-                new GetWeatherTask().execute(url);
-
-            }
-
-            @Override
-            public void onError(Status status) {
-                Log.i(TAG, "An error occurred: " + status);
             }
         });
 
@@ -213,7 +214,7 @@ public class MapsActivity extends AppCompatActivity
 
                 });
 
-        mLocationButton = (FloatingActionButton) findViewById(R.id.mLocationButton);
+        mLocationButton = (Button) findViewById(R.id.mLocationButton);
 
         //Listener to reset map location back to device's GPS location
         mLocationButton.setOnClickListener(
@@ -251,6 +252,7 @@ public class MapsActivity extends AppCompatActivity
         mConditionText = (TextView) findViewById(R.id.mConditionText);
         mTempText = (TextView) findViewById(R.id.mTempText);
         mHumidityText = (TextView) findViewById(R.id.mHumidityText);
+
     }
 
     /**
@@ -549,10 +551,9 @@ public class MapsActivity extends AppCompatActivity
             //Set global weather object based on location
             locationWeather = weather;
 
-            AutocompleteFilter mCountryFilter = new AutocompleteFilter.Builder()
+            mCountryFilter = new AutocompleteFilter.Builder()
                     .setCountry(weather.getCountryCode())
                     .build();
-            mAutocompleteFragment.setFilter(mCountryFilter);
 
             //Set textViews with their corresponding text values
             mConditionText.setText(weather.getCondition());
@@ -685,6 +686,37 @@ public class MapsActivity extends AppCompatActivity
         String formattedDate = new String(time + " " + day + "/" + month);
 
         return formattedDate;
+    }
+
+    //Method for allowing Google Places intent on search button
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(this, data);
+
+                //Set place Lat and Lon of place to location and lat/lon variables
+                LatLng placeLatLng = place.getLatLng();
+                lat = placeLatLng.latitude;
+                lon = placeLatLng.longitude;
+                mLocation.setLatitude(lat);
+                mLocation.setLongitude(lon);
+
+                //update map's location to place location
+                updateLocationUI();
+
+                //get weather for place
+                String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
+                new GetWeatherTask().execute(url);
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
+                // TODO: Handle the error.
+                Log.i(TAG, status.getStatusMessage());
+
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
+        }
     }
 
     //Method to draw overlay
