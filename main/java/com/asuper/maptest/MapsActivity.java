@@ -111,6 +111,7 @@ public class MapsActivity extends AppCompatActivity
 
     //UI variables
     private Toolbar mToolbar;
+    private TextView mStationNameText;
     private Button mSearchButton;
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private AutocompleteFilter mCountryFilter;
@@ -151,6 +152,8 @@ public class MapsActivity extends AppCompatActivity
         //Set up toolbar
         mToolbar = (Toolbar) findViewById(R.id.mToolbar);
         setSupportActionBar(mToolbar);
+
+        mStationNameText = (TextView) findViewById(R.id.mStationNameText);
 
         mSearchButton = (Button) findViewById(R.id.mSearchButton);
 
@@ -556,6 +559,7 @@ public class MapsActivity extends AppCompatActivity
                     .build();
 
             //Set textViews with their corresponding text values
+            mStationNameText.setText(weather.getStationName());
             mConditionText.setText(weather.getCondition());
             mTempText.setText((Integer.toString((int)Math.round(weather.getTemp())) + degree + "C"));
             mHumidityText.setText(Double.toString(weather.getHumidity()) + "%");
@@ -710,11 +714,11 @@ public class MapsActivity extends AppCompatActivity
                 new GetWeatherTask().execute(url);
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
-                // TODO: Handle the error.
                 Log.i(TAG, status.getStatusMessage());
 
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.
+                Log.i(TAG, "Search Cancelled");
             }
         }
     }
