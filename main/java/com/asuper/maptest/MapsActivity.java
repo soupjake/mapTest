@@ -116,12 +116,15 @@ public class MapsActivity extends AppCompatActivity
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private AutocompleteFilter mCountryFilter;
     private Button mLocationButton;
-    private SeekBar mSeekForecast;
     private FloatingActionButton mOverlayButton;
     private TextView mDescriptionText;
     private TextView mTempText;
     private TextView mHumidityText;
     private Toast mDateToast;
+    private TextView mDateText;
+    private Button mMinusButton;
+    private Button mPlusButton;
+    private int mWeatherSelection = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,47 +178,41 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        mSeekForecast = (SeekBar) findViewById(R.id.mSeekForecast);
+        //Set up forecast CardView
+        mDateText = (TextView) findViewById(R.id.mDateText);
+        mMinusButton = (Button) findViewById(R.id.mMinusButton);
+        mMinusButton.setEnabled(false);
+        mMinusButton.setTextColor(Color.TRANSPARENT);
+        mMinusButton.setOnClickListener(new View.OnClickListener(){
 
-        //Allows seekbar to get forecasted weather
-        mSeekForecast.setOnSeekBarChangeListener(
-                new SeekBar.OnSeekBarChangeListener(){
-                    int progressValue;
+            @Override
+            public void onClick(View v) {
+                if (mWeatherSelection != 0){
+                    --mWeatherSelection;
+                }
+                try{
+                    selectForecast(mWeatherSelection);
+                } catch (IndexOutOfBoundsException | JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        });
 
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        progressValue = progress;
-                    }
+        mPlusButton = (Button) findViewById(R.id.mPlusButton);
+        mPlusButton.setOnClickListener(new View.OnClickListener(){
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-
-                        try{
-                            selectForecast(progressValue);
-                        } catch (ArrayIndexOutOfBoundsException | JSONException e){
-                            e.printStackTrace();
-                        }
-
-                        //Create toast to display date of forecast
-                        Context context = getApplicationContext();
-
-                        CharSequence text = formatDate(progressValue);
-                        int duration = Toast.LENGTH_SHORT;
-
-                        if(mDateToast != null) {
-                            mDateToast.cancel();
-                        }
-                        mDateToast = Toast.makeText(context, text, duration);
-                        mDateToast.setGravity(Gravity.BOTTOM, 0, 120);
-                        mDateToast.show();
-                    }
-
-                });
+            @Override
+            public void onClick(View v) {
+                if (mWeatherSelection != (weatherVec.size()-1)){
+                    ++mWeatherSelection;
+                }
+                try{
+                    selectForecast(mWeatherSelection);
+                } catch (IndexOutOfBoundsException | JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        });
 
         mLocationButton = (Button) findViewById(R.id.mLocationButton);
 
@@ -564,6 +561,7 @@ public class MapsActivity extends AppCompatActivity
                     .build();
 
             //Set textViews with their corresponding text values
+            mDateText.setText(weather.getDate());
             mStationNameText.setText(weather.getStationName());
             mDescriptionText.setText(weather.getDescription());
             mTempText.setText((Integer.toString((int)Math.round(weather.getTemp())) + degree + "C"));
@@ -638,13 +636,13 @@ public class MapsActivity extends AppCompatActivity
 
 
             Log.i(TAG, "Weather and Forecast loaded successfully!");
-            //Reset forecast Seekbar to 0 and size to forecastVec if changed
-            if (mSeekForecast.getProgress() != 0){
-                mSeekForecast.setProgress(0);
-            }
 
-            //Set forecast seekbar max to size of forecast vector
-            mSeekForecast.setMax(weatherVec.size() - 1);
+            //Reset forecast Selection CardView
+            mWeatherSelection = 0;
+            mMinusButton.setEnabled(false);
+            mMinusButton.setTextColor(Color.TRANSPARENT);
+            mPlusButton.setEnabled(true);
+            mPlusButton.setTextColor(Color.GRAY);
         }
 
     }
@@ -667,17 +665,31 @@ public class MapsActivity extends AppCompatActivity
         Weather forecastTemp = weatherVec.get(forecastItem);
 
         //Set textViews with their corresponding text values
+        mDateText.setText(formatDate(forecastTemp.getDate()));
         mDescriptionText.setText(forecastTemp.getDescription());
         mTempText.setText((Integer.toString((int)Math.round(forecastTemp.getTemp())) + degree + "C"));
         mHumidityText.setText(Double.toString(forecastTemp.getHumidity()) + "%");
 
+        //Set forecast buttons to be disabled or enabled based on mWeatherSelection
+        if(mWeatherSelection > 0){
+            mMinusButton.setEnabled(true);
+            mMinusButton.setTextColor(Color.GRAY);
+        } else {
+            mMinusButton.setEnabled(false);
+            mMinusButton.setTextColor(Color.TRANSPARENT);
+        }
+        if(mWeatherSelection == (weatherVec.size()-1)){
+            mPlusButton.setEnabled(false);
+            mPlusButton.setTextColor(Color.TRANSPARENT);
+        } else {
+            mPlusButton.setEnabled(true);
+            mPlusButton.setTextColor(Color.GRAY);
+        }
+
     }
 
     //Method for formatting date
-    public String formatDate(int forecastItem){
-
-        //Get forecast date string from object
-        String date =  weatherVec.get(forecastItem).getDate();
+    public String formatDate(String date){
 
         //First check if date is "present" so to skip it
         if(date.equals("Present")){
