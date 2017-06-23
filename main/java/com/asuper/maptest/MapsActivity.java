@@ -74,7 +74,7 @@ public class MapsActivity extends AppCompatActivity
     private Weather locationWeather = new Weather();
 
     //Vector to store forecast information
-    private Vector<Weather> forecastVec = new Vector<Weather>();
+    private Vector<Weather> weatherVec = new Vector<Weather>();
 
     //String variable to set unit type
     private String units = "metric";
@@ -118,7 +118,7 @@ public class MapsActivity extends AppCompatActivity
     private Button mLocationButton;
     private SeekBar mSeekForecast;
     private FloatingActionButton mOverlayButton;
-    private TextView mConditionText;
+    private TextView mDescriptionText;
     private TextView mTempText;
     private TextView mHumidityText;
     private Toast mDateToast;
@@ -231,8 +231,7 @@ public class MapsActivity extends AppCompatActivity
                         updateLocationUI();
 
                         //Get weather for GPS location
-                        String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
-                        new GetWeatherTask().execute(url);
+                        getWeather();
                     }
                 }
         );
@@ -252,7 +251,7 @@ public class MapsActivity extends AppCompatActivity
         );
 
         //Set weather TextViews
-        mConditionText = (TextView) findViewById(R.id.mConditionText);
+        mDescriptionText = (TextView) findViewById(R.id.mDescriptionText);
         mTempText = (TextView) findViewById(R.id.mTempText);
         mHumidityText = (TextView) findViewById(R.id.mHumidityText);
 
@@ -344,9 +343,8 @@ public class MapsActivity extends AppCompatActivity
                 //update map's location to place location
                 updateLocationUI();
 
-                //get weather for place
-                String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
-                new GetWeatherTask().execute(url);
+                //Get weather for place
+                getWeather();
             }
         });
 
@@ -384,9 +382,10 @@ public class MapsActivity extends AppCompatActivity
 
         //Use location to run Weather Task to get weather info
         if (mLocation != null) {
+
             //Get weather of location
-            String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
-            new GetWeatherTask().execute(url);
+            getWeather();
+
         } else {
             Log.i(TAG, "location is null");
         }
@@ -496,13 +495,16 @@ public class MapsActivity extends AppCompatActivity
     /**
      * AsyncTask which gets weather information from OpenWeatherMap API and stores it into weatherVec
      */
-    private class GetWeatherTask extends AsyncTask<String, Void, Weather> {
+    private class WeatherTask extends AsyncTask<String, Void, Weather> {
 
         @Override
         protected Weather doInBackground(String... strings) {
 
             //Weather object for first city weather to load as default
             Weather weather = new Weather();
+
+            //Clear weatherVec so new data can be loaded in
+            weatherVec.clear();
 
             try {
                 URL url = new URL(strings[0]);
@@ -523,6 +525,9 @@ public class MapsActivity extends AppCompatActivity
                 //Set nearest weather station's name
                 weather.setStationName(weatherJSON.getString("name"));
 
+                //Set date as "present"
+                weather.setDate("Present");
+
                 //Set country's code based on location
                 JSONObject sysObj = weatherJSON.getJSONObject("sys");
                 weather.setCountryCode(sysObj.getString("country"));
@@ -531,14 +536,14 @@ public class MapsActivity extends AppCompatActivity
                 JSONArray weatherArray = weatherJSON.getJSONArray("weather");
                 JSONObject weatherObj = weatherArray.getJSONObject(0);
                 weather.setCondition(weatherObj.getString("main"));
-                weather.setDescription(weatherObj.getString("description"));
+                weather.setDescription(stringCapitalise(weatherObj.getString("description")));
 
                 //Get city's temperature and humidity
                 JSONObject mainObj = weatherJSON.getJSONObject("main");
                 weather.setTemp(mainObj.getDouble("temp"));
                 weather.setHumidity(mainObj.getDouble("humidity"));
 
-                weather = weather;
+                weatherVec.add(weather);
 
                 urlConnection.disconnect();
             } catch (IOException | JSONException e) {
@@ -560,21 +565,17 @@ public class MapsActivity extends AppCompatActivity
 
             //Set textViews with their corresponding text values
             mStationNameText.setText(weather.getStationName());
-            mConditionText.setText(weather.getCondition());
+            mDescriptionText.setText(weather.getDescription());
             mTempText.setText((Integer.toString((int)Math.round(weather.getTemp())) + degree + "C"));
             mHumidityText.setText(Double.toString(weather.getHumidity()) + "%");
 
-            String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
-            new GetForecastTask().execute(url);
+            getForecast();
         }
     }
-    private class GetForecastTask extends AsyncTask<String, Void, Weather> {
+    private class ForecastTask extends AsyncTask<String, Void, Weather> {
 
         @Override
         protected Weather doInBackground(String... strings) {
-
-            //Clear weatherVec so new data can be loaded in
-            forecastVec.clear();
 
             //Weather object for first city weather to load as default
             Weather weather = new Weather();
@@ -606,7 +607,7 @@ public class MapsActivity extends AppCompatActivity
                     JSONArray weatherArray = listObj.getJSONArray("weather");
                     JSONObject weatherObj = weatherArray.getJSONObject(0);
                     weatherTemp.setCondition(weatherObj.getString("main"));
-                    weatherTemp.setDescription(weatherObj.getString("description"));
+                    weatherTemp.setDescription(stringCapitalise(weatherObj.getString("description")));
 
                     //JSON Object of main weather doubles
                     JSONObject main = listObj.getJSONObject("main");
@@ -618,11 +619,11 @@ public class MapsActivity extends AppCompatActivity
                     weatherTemp.setDate(date);
 
                     //Add to forecastVec
-                    forecastVec.add(weatherTemp);
+                    weatherVec.add(weatherTemp);
                 }
 
-                //Set first item in weatherVector as default
-                weather = forecastVec.get(0);
+                //Set first item in weatherVector as default (not used atm)
+                weather = weatherVec.get(1);
 
                 urlConnection.disconnect();
             } catch (IOException | JSONException e) {
@@ -643,18 +644,30 @@ public class MapsActivity extends AppCompatActivity
             }
 
             //Set forecast seekbar max to size of forecast vector
-            mSeekForecast.setMax(forecastVec.size() - 1);
+            mSeekForecast.setMax(weatherVec.size() - 1);
         }
 
+    }
+
+    //Method to getting weather
+    public void getWeather() {
+        String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
+        new WeatherTask().execute(url);
+    }
+
+    //Method to getting forecast
+    public void getForecast() {
+        String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
+        new ForecastTask().execute(url);
     }
 
     //Method for getting forecast weather
     public void selectForecast(int forecastItem) throws JSONException{
 
-        Weather forecastTemp = forecastVec.get(forecastItem);
+        Weather forecastTemp = weatherVec.get(forecastItem);
 
         //Set textViews with their corresponding text values
-        mConditionText.setText(forecastTemp.getCondition());
+        mDescriptionText.setText(forecastTemp.getDescription());
         mTempText.setText((Integer.toString((int)Math.round(forecastTemp.getTemp())) + degree + "C"));
         mHumidityText.setText(Double.toString(forecastTemp.getHumidity()) + "%");
 
@@ -664,32 +677,38 @@ public class MapsActivity extends AppCompatActivity
     public String formatDate(int forecastItem){
 
         //Get forecast date string from object
-        String forecastDate =  forecastVec.get(forecastItem).getDate();
+        String date =  weatherVec.get(forecastItem).getDate();
 
-        //Get time, month and date substrings
-        String time = forecastDate.substring(11, 13);
-        String month = forecastDate.substring(5, 7);
-        String day = forecastDate.substring(8, 10);
-
-        //Change time to friendly format
-        int timeInt = Integer.parseInt(time);
-
-        if(timeInt == 0) {
-            timeInt += 12;
-            time = (timeInt + "am");
-        } else if (timeInt < 12){
-            time = (timeInt + "am");
-        } else if (timeInt == 12) {
-            time = (timeInt + "pm");
+        //First check if date is "present" so to skip it
+        if(date.equals("Present")){
+            return date;
         } else {
-            timeInt -= 12;
-            time = (timeInt + "pm");
+
+            //Get time, month and date substrings
+            String time = date.substring(11, 13);
+            String month = date.substring(5, 7);
+            String day = date.substring(8, 10);
+
+            //Change time to friendly format
+            int timeInt = Integer.parseInt(time);
+
+            if (timeInt == 0) {
+                timeInt += 12;
+                time = (timeInt + "am");
+            } else if (timeInt < 12) {
+                time = (timeInt + "am");
+            } else if (timeInt == 12) {
+                time = (timeInt + "pm");
+            } else {
+                timeInt -= 12;
+                time = (timeInt + "pm");
+            }
+
+            //Combine for rearranged date UK format
+            String formattedDate = new String(time + " " + day + "/" + month);
+
+            return formattedDate;
         }
-
-        //Combine for rearranged date UK format
-        String formattedDate = new String(time + " " + day + "/" + month);
-
-        return formattedDate;
     }
 
     //Method for allowing Google Places intent on search button
@@ -709,9 +728,9 @@ public class MapsActivity extends AppCompatActivity
                 //update map's location to place location
                 updateLocationUI();
 
-                //get weather for place
-                String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
-                new GetWeatherTask().execute(url);
+                //Get weather for place
+                getWeather();
+
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 Log.i(TAG, status.getStatusMessage());
@@ -737,5 +756,17 @@ public class MapsActivity extends AppCompatActivity
                 .strokeWidth(0)
                 .fillColor(Color.argb(humidPerc, 0, 153, 255))
         );
+    }
+
+    //Method for capitalising each word in string
+    public String stringCapitalise(String str) {
+        String[] strArray = str.split(" ");
+        StringBuilder builder = new StringBuilder();
+        for (String s : strArray) {
+            String cap = s.substring(0, 1).toUpperCase() + s.substring(1);
+            builder.append(cap + " ");
+        }
+        str = builder.toString();
+        return str;
     }
 }
