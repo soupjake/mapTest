@@ -94,18 +94,9 @@
             android:text="0"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
-            android:id="@+id/mTempText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:text="0"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/mHumidityText"
+            android:id="@+id/mWeatherText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|right"
@@ -129,6 +120,38 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@android:drawable/star_big_off"
+        tools:layout_constraintBottom_creator="1"
+        tools:layout_constraintRight_creator="1" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/mTempButton"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:clickable="true"
+        app:backgroundTint="@android:color/white"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@+id/mOverlayButton"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@android:color/holo_orange_light"
+        tools:layout_constraintBottom_creator="1"
+        tools:layout_constraintRight_creator="1" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/mHumidityButton"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:clickable="true"
+        app:backgroundTint="@android:color/white"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@+id/mTempButton"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@android:color/holo_blue_dark"
         tools:layout_constraintBottom_creator="1"
         tools:layout_constraintRight_creator="1" />
 

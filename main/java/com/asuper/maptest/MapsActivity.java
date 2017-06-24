@@ -21,7 +21,6 @@ import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -70,16 +69,16 @@ public class MapsActivity extends AppCompatActivity
     private static final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
 
     //Weather object used for overlay
-    private Weather locationWeather = new Weather();
+    private Weather mWeather = new Weather();
 
     //Vector to store forecast information
-    private Vector<Weather> weatherVec = new Vector<Weather>();
+    private Vector<Weather> mWeatherVec = new Vector<>();
 
     //String variable to set unit type
-    private String units = "metric";
+    private String mUnits = "metric";
 
     //String unicode for degree sign
-    private String degree = "\u00b0";
+    private String mDegrees = "\u00b0";
 
     // The entry point to Google Play services, used by the Places API and Fused Location Provider.
     private GoogleApiClient mGoogleApiClient;
@@ -94,8 +93,8 @@ public class MapsActivity extends AppCompatActivity
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     protected Location mLocation;
-    private double lat;
-    private double lon;
+    private double mLat;
+    private double mLon;
 
     // Keys for storing activity state.
     private static final String KEY_CAMERA_POSITION = "camera_position";
@@ -108,19 +107,24 @@ public class MapsActivity extends AppCompatActivity
     private String[] mLikelyPlaceAttributions = new String[mMaxEntries];
     private LatLng[] mLikelyPlaceLatLngs = new LatLng[mMaxEntries];
 
-    //UI variables
+    //AppBar variables
     private Toolbar mToolbar;
     private TextView mStationNameText;
     private Button mSearchButton;
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private AutocompleteFilter mCountryFilter;
     private Button mLocationButton;
-    private FloatingActionButton mOverlayButton;
-    private TextView mDescriptionText;
-    private TextView mTempText;
-    private TextView mHumidityText;
 
-    //Forecast Card variables
+    //Weather button and card variables
+    private FloatingActionButton mOverlayButton;
+    private FloatingActionButton mTempButton;
+    private FloatingActionButton mHumidityButton;
+    private TextView mDescriptionText;
+    private TextView mWeatherText;
+    private int mWeatherInt = 0;
+
+
+    //Forecast ard variables
     private CardView mForecastCard;
     private TextView mDateText;
     private Button mMinusButton;
@@ -153,14 +157,13 @@ public class MapsActivity extends AppCompatActivity
                 .build();
         mGoogleApiClient.connect();
 
-        //Set up toolbar
+        //Set up AppBar
         mToolbar = (Toolbar) findViewById(R.id.mToolbar);
         setSupportActionBar(mToolbar);
 
         mStationNameText = (TextView) findViewById(R.id.mStationNameText);
 
         mSearchButton = (Button) findViewById(R.id.mSearchButton);
-
         mSearchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -178,6 +181,23 @@ public class MapsActivity extends AppCompatActivity
 
             }
         });
+
+        mLocationButton = (Button) findViewById(R.id.mLocationButton);
+        mLocationButton.setOnClickListener(
+                new FloatingActionButton.OnClickListener(){
+
+                    @Override
+                    public void onClick(View v) {
+
+                        //Get location based on GPS and update map UI
+                        getDeviceLocation();
+                        updateLocationUI();
+
+                        //Get weather for GPS location
+                        getWeather();
+                    }
+                }
+        );
 
         //Set up forecast CardView
         mForecastCard = (CardView) findViewById(R.id.mForecastCard);
@@ -205,7 +225,7 @@ public class MapsActivity extends AppCompatActivity
 
             @Override
             public void onClick(View v) {
-                if (mWeatherSelection != (weatherVec.size()-1)){
+                if (mWeatherSelection != (mWeatherVec.size()-1)){
                     ++mWeatherSelection;
                 }
                 try{
@@ -216,28 +236,8 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        mLocationButton = (Button) findViewById(R.id.mLocationButton);
-
-        //Listener to reset map location back to device's GPS location
-        mLocationButton.setOnClickListener(
-                new FloatingActionButton.OnClickListener(){
-
-                    @Override
-                    public void onClick(View v) {
-
-                        //Get location based on GPS and update map UI
-                        getDeviceLocation();
-                        updateLocationUI();
-
-                        //Get weather for GPS location
-                        getWeather();
-                    }
-                }
-        );
-
+        //Set up weather Buttons
         mOverlayButton = (FloatingActionButton) findViewById(R.id.mOverlayButton);
-
-        //Listener to apply overlay method
         mOverlayButton.setOnClickListener(
                 new FloatingActionButton.OnClickListener(){
 
@@ -259,10 +259,34 @@ public class MapsActivity extends AppCompatActivity
                 }
         );
 
+        mTempButton = (FloatingActionButton) findViewById(R.id.mTempButton);
+        mTempButton.setOnClickListener(
+                new FloatingActionButton.OnClickListener(){
+
+                    @Override
+                    public void onClick(View v) {
+                        mWeatherInt = 0;
+                        //mTempButton.setBackgroundDrawable(Color.RED);
+                        mWeatherText.setText((Integer.toString((int)Math.round(mWeather.getTemp())) + mDegrees + "C"));
+                    }
+                }
+        );
+
+        mHumidityButton = (FloatingActionButton) findViewById(R.id.mHumidityButton);
+        mHumidityButton.setOnClickListener(
+                new FloatingActionButton.OnClickListener(){
+
+                    @Override
+                    public void onClick(View v) {
+                        mWeatherInt = 1;
+                        mWeatherText.setText(Double.toString(mWeather.getHumidity()) + "%");
+                    }
+                }
+        );
+
         //Set weather TextViews
         mDescriptionText = (TextView) findViewById(R.id.mDescriptionText);
-        mTempText = (TextView) findViewById(R.id.mTempText);
-        mHumidityText = (TextView) findViewById(R.id.mHumidityText);
+        mWeatherText = (TextView) findViewById(R.id.mWeatherText);
 
     }
 
@@ -344,10 +368,10 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                lat = latLng.latitude;
-                lon = latLng.longitude;
-                mLocation.setLatitude(lat);
-                mLocation.setLongitude(lon);
+                mLat = latLng.latitude;
+                mLon = latLng.longitude;
+                mLocation.setLatitude(mLat);
+                mLocation.setLongitude(mLon);
 
                 //update map's location to place location
                 updateLocationUI();
@@ -426,8 +450,8 @@ public class MapsActivity extends AppCompatActivity
             //First set location to variable for use
             mLocation = LocationServices.FusedLocationApi
                     .getLastLocation(mGoogleApiClient);
-            lat = mLocation.getLatitude();
-            lon = mLocation.getLongitude();
+            mLat = mLocation.getLatitude();
+            mLon = mLocation.getLongitude();
         }
     }
 
@@ -479,7 +503,7 @@ public class MapsActivity extends AppCompatActivity
         if (mLocationPermissionGranted) {
             mMap.clear();
             mMap.setMyLocationEnabled(true);
-            mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)));
+            mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
             mMap.getUiSettings().setMyLocationButtonEnabled(false);
         } else {
             mMap.setMyLocationEnabled(false);
@@ -513,7 +537,7 @@ public class MapsActivity extends AppCompatActivity
             Weather weather = new Weather();
 
             //Clear weatherVec so new data can be loaded in
-            weatherVec.clear();
+            mWeatherVec.clear();
 
             try {
                 URL url = new URL(strings[0]);
@@ -552,7 +576,7 @@ public class MapsActivity extends AppCompatActivity
                 weather.setTemp(mainObj.getDouble("temp"));
                 weather.setHumidity(mainObj.getDouble("humidity"));
 
-                weatherVec.add(weather);
+                mWeatherVec.add(weather);
 
                 urlConnection.disconnect();
             } catch (IOException | JSONException e) {
@@ -566,7 +590,7 @@ public class MapsActivity extends AppCompatActivity
             super.onPostExecute(weather);
 
             //Set global weather object based on location
-            locationWeather = weather;
+            mWeather = weather;
 
             mCountryFilter = new AutocompleteFilter.Builder()
                     .setCountry(weather.getCountryCode())
@@ -576,8 +600,11 @@ public class MapsActivity extends AppCompatActivity
             mDateText.setText(weather.getDate());
             mStationNameText.setText(weather.getStationName());
             mDescriptionText.setText(weather.getDescription());
-            mTempText.setText((Integer.toString((int)Math.round(weather.getTemp())) + degree + "C"));
-            mHumidityText.setText(Double.toString(weather.getHumidity()) + "%");
+            if(mWeatherInt == 0){
+                mWeatherText.setText((Integer.toString((int)Math.round(weather.getTemp())) + mDegrees + "C"));
+            } else if (mWeatherInt == 1){
+                mWeatherText.setText(Double.toString(weather.getHumidity()) + "%");
+            }
 
             getForecast();
         }
@@ -629,11 +656,11 @@ public class MapsActivity extends AppCompatActivity
                     weatherTemp.setDate(date);
 
                     //Add to forecastVec
-                    weatherVec.add(weatherTemp);
+                    mWeatherVec.add(weatherTemp);
                 }
 
                 //Set first item in weatherVector as default (not used atm)
-                weather = weatherVec.get(1);
+                weather = mWeatherVec.get(1);
 
                 urlConnection.disconnect();
             } catch (IOException | JSONException e) {
@@ -661,26 +688,29 @@ public class MapsActivity extends AppCompatActivity
 
     //Method to getting weather
     public void getWeather() {
-        String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
+        String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + mLat + "&lon=" + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
         new WeatherTask().execute(url);
     }
 
     //Method to getting forecast
     public void getForecast() {
-        String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + APP_ID;
+        String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + mLat + "&lon=" + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
         new ForecastTask().execute(url);
     }
 
     //Method for getting forecast weather
     public void selectForecast(int forecastItem) throws JSONException{
 
-        Weather forecastTemp = weatherVec.get(forecastItem);
+        Weather forecastTemp = mWeatherVec.get(forecastItem);
 
         //Set textViews with their corresponding text values
         mDateText.setText(formatDate(forecastTemp.getDate()));
         mDescriptionText.setText(forecastTemp.getDescription());
-        mTempText.setText((Integer.toString((int)Math.round(forecastTemp.getTemp())) + degree + "C"));
-        mHumidityText.setText(Double.toString(forecastTemp.getHumidity()) + "%");
+        if(mWeatherInt == 0){
+            mWeatherText.setText((Integer.toString((int)Math.round(forecastTemp.getTemp())) + mDegrees + "C"));
+        } else if (mWeatherInt == 1){
+            mWeatherText.setText(Double.toString(forecastTemp.getHumidity()) + "%");
+        }
 
         //Set forecast buttons to be disabled or enabled based on mWeatherSelection
         if(mWeatherSelection > 0){
@@ -690,7 +720,7 @@ public class MapsActivity extends AppCompatActivity
             mMinusButton.setEnabled(false);
             mMinusButton.setTextColor(Color.TRANSPARENT);
         }
-        if(mWeatherSelection == (weatherVec.size()-1)){
+        if(mWeatherSelection == (mWeatherVec.size()-1)){
             mPlusButton.setEnabled(false);
             mPlusButton.setTextColor(Color.TRANSPARENT);
         } else {
@@ -744,10 +774,10 @@ public class MapsActivity extends AppCompatActivity
 
                 //Set place Lat and Lon of place to location and lat/lon variables
                 LatLng placeLatLng = place.getLatLng();
-                lat = placeLatLng.latitude;
-                lon = placeLatLng.longitude;
-                mLocation.setLatitude(lat);
-                mLocation.setLongitude(lon);
+                mLat = placeLatLng.latitude;
+                mLon = placeLatLng.longitude;
+                mLocation.setLatitude(mLat);
+                mLocation.setLongitude(mLon);
 
                 //update map's location to place location
                 updateLocationUI();
@@ -771,11 +801,11 @@ public class MapsActivity extends AppCompatActivity
 
         mMap.clear();
 
-        mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
 
-        int humidPerc = Math.round((int)locationWeather.getHumidity()) * 2;
+        int humidPerc = Math.round((int)mWeather.getHumidity()) * 2;
         Circle circle = mMap.addCircle(new CircleOptions()
-                .center(new LatLng(lat, lon))
+                .center(new LatLng(mLat, mLon))
                 .radius(2000) //in metres
                 .strokeWidth(0)
                 .fillColor(Color.argb(humidPerc, 0, 153, 255))
