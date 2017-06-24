@@ -1,6 +1,5 @@
 package com.asuper.maptest;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -12,15 +11,15 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -120,7 +119,9 @@ public class MapsActivity extends AppCompatActivity
     private TextView mDescriptionText;
     private TextView mTempText;
     private TextView mHumidityText;
-    private Toast mDateToast;
+
+    //Forecast Card variables
+    private CardView mForecastCard;
     private TextView mDateText;
     private Button mMinusButton;
     private Button mPlusButton;
@@ -179,6 +180,7 @@ public class MapsActivity extends AppCompatActivity
         });
 
         //Set up forecast CardView
+        mForecastCard = (CardView) findViewById(R.id.mForecastCard);
         mDateText = (TextView) findViewById(R.id.mDateText);
         mMinusButton = (Button) findViewById(R.id.mMinusButton);
         mMinusButton.setEnabled(false);
@@ -242,7 +244,17 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
 
-                        drawOverlay();
+                        //drawOverlay();
+                        if(mForecastCard.isEnabled()){
+                            mForecastCard.setAnimation(fadeAnimation(1, 0));
+                            mForecastCard.setVisibility(View.GONE);
+                            mForecastCard.setEnabled(false);
+                        } else {
+                            mForecastCard.setAnimation(fadeAnimation(0, 1));
+                            mForecastCard.setVisibility(View.VISIBLE);
+                            mForecastCard.setEnabled(true);
+                        }
+
                     }
                 }
         );
@@ -780,5 +792,12 @@ public class MapsActivity extends AppCompatActivity
         }
         str = builder.toString();
         return str;
+    }
+
+    //Method used for creating fading in or out animation
+    public AlphaAnimation fadeAnimation(int fadeIn, int fadeOut){
+        AlphaAnimation animation = new AlphaAnimation(fadeIn, fadeOut);
+        animation.setDuration(500);
+        return animation;
     }
 }
