@@ -108,99 +108,131 @@
     </android.support.v7.widget.CardView>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/mOverlayButton"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:id="@+id/mWeatherButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:clickable="true"
         app:backgroundTint="@android:color/white"
-        app:fabSize="mini"
+        app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@android:drawable/star_big_off"
         tools:layout_constraintBottom_creator="1"
         tools:layout_constraintRight_creator="1" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/mTempButton"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:clickable="true"
-        app:backgroundTint="@android:color/white"
-        app:fabSize="mini"
-        app:layout_constraintBottom_toTopOf="@+id/mOverlayButton"
-        app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@android:color/holo_orange_light"
-        tools:layout_constraintBottom_creator="1"
-        tools:layout_constraintRight_creator="1" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/mHumidityButton"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:clickable="true"
-        app:backgroundTint="@android:color/white"
-        app:fabSize="mini"
-        app:layout_constraintBottom_toTopOf="@+id/mTempButton"
-        app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@android:color/holo_blue_dark"
-        tools:layout_constraintBottom_creator="1"
-        tools:layout_constraintRight_creator="1" />
-
-    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/mForecastCard"
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/mWeatherConstraint"
         android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="16dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/mOverlayButton"
-        card_view:cardCornerRadius="4dp"
-        tools:layout_constraintBottom_creator="1"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintRight_creator="1">
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:context="com.asuper.maptest.MapsActivity"
+        tools:layout="@layout/activity_maps"
+        tools:layout_editor_absoluteY="8dp"
+        tools:layout_editor_absoluteX="8dp">
 
-        <TextView
-            android:id="@+id/mDateText"
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/mPlaceHolderButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Date"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:clickable="false"
+            android:visibility="invisible"
+            app:fabSize="normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintRight_creator="1" />
 
-        <Button
-            android:id="@+id/mMinusButton"
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/mTempButton"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="left"
-            android:background="@android:color/transparent"
-            android:text="-"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="40sp" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:clickable="true"
+            app:backgroundTint="@android:color/white"
+            app:fabSize="normal"
+            app:layout_constraintBottom_toTopOf="@+id/mPlaceHolderButton"
+            app:layout_constraintRight_toRightOf="parent"
+            app:srcCompat="@android:color/holo_orange_light"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintRight_creator="1" />
 
-        <Button
-            android:id="@+id/mPlusButton"
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/mHumidityButton"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="right"
-            android:background="@android:color/transparent"
-            android:text="+"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="40sp" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:clickable="true"
+            app:backgroundTint="@android:color/white"
+            app:fabSize="normal"
+            app:layout_constraintBottom_toTopOf="@+id/mTempButton"
+            app:layout_constraintRight_toRightOf="parent"
+            app:srcCompat="@android:color/holo_blue_dark"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintRight_creator="1" />
 
-    </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/mForecastCard"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/mPlaceHolderButton"
+            card_view:cardCornerRadius="4dp"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1">
+
+            <TextView
+                android:id="@+id/mDateText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Date"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <Button
+                android:id="@+id/mMinusButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="left"
+                android:background="@android:color/transparent"
+                android:text="-"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="40sp" />
+
+            <Button
+                android:id="@+id/mPlusButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:background="@android:color/transparent"
+                android:text="+"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="40sp" />
+
+        </android.support.v7.widget.CardView>
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

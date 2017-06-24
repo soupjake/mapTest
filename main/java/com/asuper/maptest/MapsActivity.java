@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -116,7 +117,7 @@ public class MapsActivity extends AppCompatActivity
     private Button mLocationButton;
 
     //Weather button and card variables
-    private FloatingActionButton mOverlayButton;
+    private FloatingActionButton mWeatherButton;
     private FloatingActionButton mTempButton;
     private FloatingActionButton mHumidityButton;
     private TextView mDescriptionText;
@@ -125,7 +126,7 @@ public class MapsActivity extends AppCompatActivity
 
 
     //Forecast ard variables
-    private CardView mForecastCard;
+    private ConstraintLayout mWeatherConstraint;
     private TextView mDateText;
     private Button mMinusButton;
     private Button mPlusButton;
@@ -200,7 +201,8 @@ public class MapsActivity extends AppCompatActivity
         );
 
         //Set up forecast CardView
-        mForecastCard = (CardView) findViewById(R.id.mForecastCard);
+        mWeatherConstraint = (ConstraintLayout) findViewById(R.id.mWeatherConstraint);
+        mWeatherConstraint.setEnabled(false);
         mDateText = (TextView) findViewById(R.id.mDateText);
         mMinusButton = (Button) findViewById(R.id.mMinusButton);
         mMinusButton.setEnabled(false);
@@ -237,22 +239,22 @@ public class MapsActivity extends AppCompatActivity
         });
 
         //Set up weather Buttons
-        mOverlayButton = (FloatingActionButton) findViewById(R.id.mOverlayButton);
-        mOverlayButton.setOnClickListener(
+        mWeatherButton = (FloatingActionButton) findViewById(R.id.mWeatherButton);
+        mWeatherButton.setOnClickListener(
                 new FloatingActionButton.OnClickListener(){
 
                     @Override
                     public void onClick(View v) {
 
                         //drawOverlay();
-                        if(mForecastCard.isEnabled()){
-                            mForecastCard.setAnimation(fadeAnimation(1, 0));
-                            mForecastCard.setVisibility(View.GONE);
-                            mForecastCard.setEnabled(false);
+                        if(mWeatherConstraint.isEnabled()){
+                            mWeatherConstraint.setAnimation(fadeAnimation(1, 0));
+                            mWeatherConstraint.setVisibility(View.GONE);
+                            mWeatherConstraint.setEnabled(false);
                         } else {
-                            mForecastCard.setAnimation(fadeAnimation(0, 1));
-                            mForecastCard.setVisibility(View.VISIBLE);
-                            mForecastCard.setEnabled(true);
+                            mWeatherConstraint.setAnimation(fadeAnimation(0, 1));
+                            mWeatherConstraint.setVisibility(View.VISIBLE);
+                            mWeatherConstraint.setEnabled(true);
                         }
 
                     }
