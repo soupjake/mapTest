@@ -3,8 +3,6 @@ package com.asuper.maptest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,6 +12,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -56,8 +55,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
-import java.util.Locale;
 import java.util.Vector;
 
 public class MapsActivity extends AppCompatActivity
@@ -249,7 +246,7 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
 
-                        drawOverlay();
+                        //drawOverlay();
                         if(mWeatherConstraint.isEnabled()){
                             mWeatherConstraint.setAnimation(fadeAnimation(1, 0));
                             mWeatherConstraint.setVisibility(View.GONE);
@@ -259,6 +256,7 @@ public class MapsActivity extends AppCompatActivity
                             mWeatherConstraint.setVisibility(View.VISIBLE);
                             mWeatherConstraint.setEnabled(true);
                         }
+
                     }
                 }
         );
@@ -565,6 +563,10 @@ public class MapsActivity extends AppCompatActivity
                 //Set date as "present"
                 weather.setDate("Present");
 
+                //Set country's code based on location
+                JSONObject sysObj = weatherJSON.getJSONObject("sys");
+                weather.setCountryCode(sysObj.getString("country"));
+
                 //Get city's weather condition and description
                 JSONArray weatherArray = weatherJSON.getJSONArray("weather");
                 JSONObject weatherObj = weatherArray.getJSONObject(0);
@@ -592,14 +594,9 @@ public class MapsActivity extends AppCompatActivity
             //Set global weather object based on location
             mWeather = weather;
 
-            //Set search filter to country code
-            try{
-                mCountryFilter = new AutocompleteFilter.Builder()
-                        .setCountry(getCountryCode())
-                        .build();
-            } catch (IOException e){
-                e.printStackTrace();
-            }
+            mCountryFilter = new AutocompleteFilter.Builder()
+                    .setCountry(weather.getCountryCode())
+                    .build();
 
             //Set textViews with their corresponding text values
             mDateText.setText(weather.getDate());
@@ -808,34 +805,13 @@ public class MapsActivity extends AppCompatActivity
 
         mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
 
-
         int humidPerc = Math.round((int)mWeather.getHumidity()) * 2;
         Circle circle = mMap.addCircle(new CircleOptions()
                 .center(new LatLng(mLat, mLon))
                 .radius(2000) //in metres
                 .strokeWidth(0)
-                .fillColor(Color.argb(100,0, 153, 255))
+                .fillColor(Color.argb(humidPerc, 0, 153, 255))
         );
-        Circle circle2 = mMap.addCircle(new CircleOptions()
-                .center(new LatLng(mLat+0.01, mLon+0.01))
-                .radius(2000) //in metres
-                .strokeWidth(0)
-                .fillColor(Color.argb(100,0, 153, 255))
-        );
-    }
-
-    //Method to get county code
-    public String getCountryCode() throws IOException {
-
-        String countyCode = "";
-
-        Geocoder gcd = new Geocoder(this.getApplicationContext(), Locale.getDefault());
-            List<Address> addresses = gcd.getFromLocation(mLat, mLon, 1);
-        if (addresses.size() > 0)
-        {
-            countyCode = addresses.get(0).getCountryCode();
-        }
-        return countyCode;
     }
 
     //Method for capitalising each word in string
