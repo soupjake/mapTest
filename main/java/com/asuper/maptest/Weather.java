@@ -7,7 +7,6 @@ package com.asuper.maptest;
 public class Weather {
 
     private String stationName;
-    private String countryCode;
     private String condition;
     private String description;
     private String date;
@@ -27,14 +26,6 @@ public class Weather {
 
     public void setStationName(String stationName) {
         this.stationName = stationName;
-    }
-
-    public String getCountryCode() {
-        return countryCode;
-    }
-
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
     }
 
     public String getCondition() {
