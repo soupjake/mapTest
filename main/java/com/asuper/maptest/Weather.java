@@ -12,14 +12,14 @@ public class Weather {
     private String description;
     private String date;
 
-    private double temp;
+    private double temp = 0.0;
     private double pressure;
-    private double humidity;
+    private int humidity = 0;
     private double windSpeed;
     private double windDeg;
-    private double cloudPercentage;
-    private double rainPercentage;
-    private double snowPercentage;
+    private int cloudPercentage = 0;
+    private double rainVolume = 0.0;
+    private double snowVolume = 0.0;
 
     public String getStationName() {
         return stationName;
@@ -69,11 +69,11 @@ public class Weather {
         this.pressure = pressure;
     }
 
-    public double getHumidity() {
+    public int getHumidity() {
         return humidity;
     }
 
-    public void setHumidity(double humidity) {
+    public void setHumidity(int humidity) {
         this.humidity = humidity;
     }
 
@@ -101,28 +101,28 @@ public class Weather {
         this.windDeg = windDeg;
     }
 
-    public double getCloudPercentage(){
+    public int getCloudPercentage(){
         return cloudPercentage;
     }
 
-    public void setCloudPercentage(double cloudPercentage) {
+    public void setCloudPercentage(int cloudPercentage) {
         this.cloudPercentage = cloudPercentage;
     }
 
-    public double getRainPercentage(){
-        return rainPercentage;
+    public double getRainVolume(){
+        return rainVolume;
     }
 
-    public void setRainPercentage(double rainPercentage) {
-        this.rainPercentage = rainPercentage;
+    public void setRainVolume(double rainVolume) {
+        this.rainVolume = rainVolume;
     }
 
-    public double getSnowPercentage(){
-        return snowPercentage;
+    public double getSnowVolume(){
+        return snowVolume;
     }
 
-    public void setSnowPercentage(double snowPercentage) {
-        this.snowPercentage = snowPercentage;
+    public void setSnowVolume(double snowVolume) {
+        this.snowVolume = snowVolume;
     }
 
 }

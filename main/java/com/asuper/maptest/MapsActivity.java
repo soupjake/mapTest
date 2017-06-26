@@ -567,17 +567,30 @@ public class MapsActivity extends AppCompatActivity
                 JSONObject sysObj = weatherJSON.getJSONObject("sys");
                 weather.setCountryCode(sysObj.getString("country"));
 
-                //Get city's weather condition and description
+                //Get weather condition and description
                 JSONArray weatherArray = weatherJSON.getJSONArray("weather");
                 JSONObject weatherObj = weatherArray.getJSONObject(0);
                 weather.setCondition(weatherObj.getString("main"));
                 weather.setDescription(stringCapitalise(weatherObj.getString("description")));
 
-                //Get city's temperature and humidity
+                //Get temperature and humidity
                 JSONObject mainObj = weatherJSON.getJSONObject("main");
                 weather.setTemp(mainObj.getDouble("temp"));
-                weather.setHumidity(mainObj.getDouble("humidity"));
+                weather.setHumidity(mainObj.getInt("humidity"));
 
+                //Get cloud percentage
+                JSONObject cloudObj = weatherJSON.getJSONObject("clouds");
+                weather.setCloudPercentage(cloudObj.getInt("all"));
+
+                //Try to get rain/snow volume
+                try{
+                    JSONObject rainObj = weatherJSON.getJSONObject("rain");
+                    weather.setRainVolume(rainObj.getDouble("3h"));
+                    JSONObject snowObj = weatherJSON.getJSONObject("snow");
+                    weather.setSnowVolume(snowObj.getDouble("3h"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 mWeatherVec.add(weather);
 
                 urlConnection.disconnect();
@@ -607,6 +620,9 @@ public class MapsActivity extends AppCompatActivity
             } else if (mWeatherInt == 1){
                 mWeatherText.setText(Double.toString(weather.getHumidity()) + "%");
             }
+
+            Log.i(TAG, "" + weather.getRainVolume());
+            Log.i(TAG, "" + weather.getSnowVolume());
 
             getForecast();
         }
@@ -651,7 +667,22 @@ public class MapsActivity extends AppCompatActivity
                     //JSON Object of main weather doubles
                     JSONObject main = listObj.getJSONObject("main");
                     weatherTemp.setTemp(main.getDouble("temp"));
-                    weatherTemp.setHumidity(main.getDouble("humidity"));
+                    weatherTemp.setHumidity(main.getInt("humidity"));
+
+                    //Get cloud percentage
+                    JSONObject cloudObj = listObj.getJSONObject("clouds");
+                    weatherTemp.setCloudPercentage(cloudObj.getInt("all"));
+
+                    //Try to get rain/snow volume
+                    try{
+                        JSONObject rainObj = listObj.getJSONObject("rain");
+                        weatherTemp.setRainVolume(rainObj.getDouble("3h"));
+                        JSONObject snowObj = listObj.getJSONObject("snow");
+                        weatherTemp.setSnowVolume(snowObj.getDouble("3h"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
 
                     //JSON Object of weather date for forecast
                     String date = (String.valueOf(listObj.get("dt_txt")));
@@ -704,6 +735,9 @@ public class MapsActivity extends AppCompatActivity
     public void selectForecast(int forecastItem) throws JSONException{
 
         Weather forecastTemp = mWeatherVec.get(forecastItem);
+
+        Log.i(TAG, "" + forecastTemp.getRainVolume());
+        Log.i(TAG, "" + forecastTemp.getSnowVolume());
 
         //Set textViews with their corresponding text values
         mDateText.setText(formatDate(forecastTemp.getDate()));
