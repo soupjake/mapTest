@@ -69,6 +69,7 @@ public class MapsActivity extends AppCompatActivity
 
     //Weather object used for overlay
     private Weather mWeather = new Weather();
+    private Weather mPresentWeather = new Weather();
 
     //Vector to store forecast information
     private Vector<Weather> mWeatherVec = new Vector<>();
@@ -629,6 +630,7 @@ public class MapsActivity extends AppCompatActivity
 
             //Set global weather object based on location
             mWeather = weather;
+            mPresentWeather = weather;
 
             mCountryFilter = new AutocompleteFilter.Builder()
                     .setCountry(weather.getCountryCode())
@@ -752,11 +754,18 @@ public class MapsActivity extends AppCompatActivity
     //Method for getting forecast weather
     public void selectForecast(int forecastItem) throws JSONException{
 
-        mWeather = mWeatherVec.get(forecastItem);
+        if(forecastItem == 0) {
 
-        //Set textViews with their corresponding text values
-        mDateText.setText(Format.formatDate(mWeather.getDate()));
-        mDescriptionText.setText(mWeather.getDescription());
+            //Set mWeather to mPresentWeather to stop date issue
+            mWeather = mPresentWeather;
+            //Set textViews with their corresponding text values
+            mDateText.setText(Format.formatDate(mWeather.getDate()));
+            mDescriptionText.setText(mWeather.getDescription());
+        } else {
+            mWeather = mWeatherVec.get(forecastItem);
+            mDateText.setText(Format.formatDate(mWeather.getDate()));
+            mDescriptionText.setText(mWeather.getDescription());
+        }
 
         //Draw weather
         drawWeather();
