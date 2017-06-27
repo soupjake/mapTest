@@ -12,14 +12,14 @@ public class Weather {
     private String description;
     private String date;
 
-    private double temp = 0.0;
-    private double pressure;
-    private int humidity = 0;
+    private int temp;
+    private int pressure;
+    private int humidity;
     private double windSpeed;
     private double windDeg;
-    private int cloudPercentage = 0;
-    private double rainVolume = 0.0;
-    private double snowVolume = 0.0;
+    private int cloudPercentage;
+    private double rainVolume;
+    private double snowVolume;
 
     public String getStationName() {
         return stationName;
@@ -61,11 +61,11 @@ public class Weather {
         this.date = date;
     }
 
-    public double getPressure() {
+    public int getPressure() {
         return pressure;
     }
 
-    public void setPressure(double pressure) {
+    public void setPressure(int pressure) {
         this.pressure = pressure;
     }
 
@@ -77,11 +77,11 @@ public class Weather {
         this.humidity = humidity;
     }
 
-    public double getTemp() {
+    public int getTemp() {
         return temp;
     }
 
-    public void setTemp(double temp) {
+    public void setTemp(int temp) {
         this.temp = temp;
     }
 

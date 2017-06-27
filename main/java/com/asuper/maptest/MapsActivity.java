@@ -12,13 +12,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -120,6 +118,7 @@ public class MapsActivity extends AppCompatActivity
     private FloatingActionButton mWeatherButton;
     private FloatingActionButton mTempButton;
     private FloatingActionButton mHumidityButton;
+    private FloatingActionButton mCloudsButton;
     private TextView mDescriptionText;
     private TextView mWeatherText;
     private int mWeatherInt = 0;
@@ -200,6 +199,10 @@ public class MapsActivity extends AppCompatActivity
                 }
         );
 
+        //Set weather TextViews
+        mDescriptionText = (TextView) findViewById(R.id.mDescriptionText);
+        mWeatherText = (TextView) findViewById(R.id.mWeatherText);
+
         //Set up forecast CardView
         mWeatherConstraint = (ConstraintLayout) findViewById(R.id.mWeatherConstraint);
         mWeatherConstraint.setEnabled(false);
@@ -248,11 +251,11 @@ public class MapsActivity extends AppCompatActivity
 
                         //drawOverlay();
                         if(mWeatherConstraint.isEnabled()){
-                            mWeatherConstraint.setAnimation(fadeAnimation(1, 0));
+                            mWeatherConstraint.setAnimation(Format.fadeAnimation(1, 0));
                             mWeatherConstraint.setVisibility(View.GONE);
                             mWeatherConstraint.setEnabled(false);
                         } else {
-                            mWeatherConstraint.setAnimation(fadeAnimation(0, 1));
+                            mWeatherConstraint.setAnimation(Format.fadeAnimation(0, 1));
                             mWeatherConstraint.setVisibility(View.VISIBLE);
                             mWeatherConstraint.setEnabled(true);
                         }
@@ -267,9 +270,7 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(View v) {
-                        mWeatherInt = 0;
-                        //mTempButton.setBackgroundDrawable(Color.RED);
-                        mWeatherText.setText((Integer.toString((int)Math.round(mWeather.getTemp())) + mDegrees + "C"));
+                        drawTemperature();
                     }
                 }
         );
@@ -280,15 +281,21 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(View v) {
-                        mWeatherInt = 1;
-                        mWeatherText.setText(Double.toString(mWeather.getHumidity()) + "%");
+                        drawHumidity();
                     }
                 }
         );
 
-        //Set weather TextViews
-        mDescriptionText = (TextView) findViewById(R.id.mDescriptionText);
-        mWeatherText = (TextView) findViewById(R.id.mWeatherText);
+        mCloudsButton = (FloatingActionButton) findViewById(R.id.mCloudsButton);
+        mCloudsButton.setOnClickListener(
+                new FloatingActionButton.OnClickListener(){
+
+                    @Override
+                    public void onClick(View v) {
+                        drawClouds();
+                    }
+                }
+        );
 
     }
 
@@ -380,6 +387,9 @@ public class MapsActivity extends AppCompatActivity
 
                 //Get weather for place
                 getWeather();
+
+                //Draw weather
+                drawWeather();
             }
         });
 
@@ -571,11 +581,11 @@ public class MapsActivity extends AppCompatActivity
                 JSONArray weatherArray = weatherJSON.getJSONArray("weather");
                 JSONObject weatherObj = weatherArray.getJSONObject(0);
                 weather.setCondition(weatherObj.getString("main"));
-                weather.setDescription(stringCapitalise(weatherObj.getString("description")));
+                weather.setDescription(Format.stringCapitalise(weatherObj.getString("description")));
 
                 //Get temperature and humidity
                 JSONObject mainObj = weatherJSON.getJSONObject("main");
-                weather.setTemp(mainObj.getDouble("temp"));
+                weather.setTemp((int)Math.round(mainObj.getDouble("temp")));
                 weather.setHumidity(mainObj.getInt("humidity"));
 
                 //Get cloud percentage
@@ -583,6 +593,7 @@ public class MapsActivity extends AppCompatActivity
                 weather.setCloudPercentage(cloudObj.getInt("all"));
 
                 //Try to get rain/snow volume
+                if(weatherJSON.getJSONObject("rain") != null)
                 try{
                     JSONObject rainObj = weatherJSON.getJSONObject("rain");
                     weather.setRainVolume(rainObj.getDouble("3h"));
@@ -615,14 +626,9 @@ public class MapsActivity extends AppCompatActivity
             mDateText.setText(weather.getDate());
             mStationNameText.setText(weather.getStationName());
             mDescriptionText.setText(weather.getDescription());
-            if(mWeatherInt == 0){
-                mWeatherText.setText((Integer.toString((int)Math.round(weather.getTemp())) + mDegrees + "C"));
-            } else if (mWeatherInt == 1){
-                mWeatherText.setText(Double.toString(weather.getHumidity()) + "%");
-            }
 
-            Log.i(TAG, "" + weather.getRainVolume());
-            Log.i(TAG, "" + weather.getSnowVolume());
+            //Draw weather
+            drawWeather();
 
             getForecast();
         }
@@ -662,11 +668,11 @@ public class MapsActivity extends AppCompatActivity
                     JSONArray weatherArray = listObj.getJSONArray("weather");
                     JSONObject weatherObj = weatherArray.getJSONObject(0);
                     weatherTemp.setCondition(weatherObj.getString("main"));
-                    weatherTemp.setDescription(stringCapitalise(weatherObj.getString("description")));
+                    weatherTemp.setDescription(Format.stringCapitalise(weatherObj.getString("description")));
 
                     //JSON Object of main weather doubles
                     JSONObject main = listObj.getJSONObject("main");
-                    weatherTemp.setTemp(main.getDouble("temp"));
+                    weatherTemp.setTemp((int)Math.round(main.getDouble("temp")));
                     weatherTemp.setHumidity(main.getInt("humidity"));
 
                     //Get cloud percentage
@@ -734,19 +740,14 @@ public class MapsActivity extends AppCompatActivity
     //Method for getting forecast weather
     public void selectForecast(int forecastItem) throws JSONException{
 
-        Weather forecastTemp = mWeatherVec.get(forecastItem);
-
-        Log.i(TAG, "" + forecastTemp.getRainVolume());
-        Log.i(TAG, "" + forecastTemp.getSnowVolume());
+        mWeather = mWeatherVec.get(forecastItem);
 
         //Set textViews with their corresponding text values
-        mDateText.setText(formatDate(forecastTemp.getDate()));
-        mDescriptionText.setText(forecastTemp.getDescription());
-        if(mWeatherInt == 0){
-            mWeatherText.setText((Integer.toString((int)Math.round(forecastTemp.getTemp())) + mDegrees + "C"));
-        } else if (mWeatherInt == 1){
-            mWeatherText.setText(Double.toString(forecastTemp.getHumidity()) + "%");
-        }
+        mDateText.setText(Format.formatDate(mWeather.getDate()));
+        mDescriptionText.setText(mWeather.getDescription());
+
+        //Draw weather
+        drawWeather();
 
         //Set forecast buttons to be disabled or enabled based on mWeatherSelection
         if(mWeatherSelection > 0){
@@ -766,40 +767,7 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    //Method for formatting date
-    public String formatDate(String date){
 
-        //First check if date is "present" so to skip it
-        if(date.equals("Present")){
-            return date;
-        } else {
-
-            //Get time, month and date substrings
-            String time = date.substring(11, 13);
-            String month = date.substring(5, 7);
-            String day = date.substring(8, 10);
-
-            //Change time to friendly format
-            int timeInt = Integer.parseInt(time);
-
-            if (timeInt == 0) {
-                timeInt += 12;
-                time = (timeInt + "am");
-            } else if (timeInt < 12) {
-                time = (timeInt + "am");
-            } else if (timeInt == 12) {
-                time = (timeInt + "pm");
-            } else {
-                timeInt -= 12;
-                time = (timeInt + "pm");
-            }
-
-            //Combine for rearranged date UK format
-            String formattedDate = new String(time + " " + day + "/" + month);
-
-            return formattedDate;
-        }
-    }
 
     //Method for allowing Google Places intent on search button
     @Override
@@ -832,38 +800,84 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    //Method to draw overlay
-    public void drawOverlay() {
+    //Method to draw humidity info and overlay
+    public void drawTemperature() {
 
+        //Change mWeatherText to display humidity
+        mWeatherInt = 0;
+        mWeatherText.setText((Integer.toString(mWeather.getTemp()) + mDegrees + "C"));
+
+        //Clear map from other circles and add position marker
         mMap.clear();
-
         mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
 
-        int humidPerc = Math.round((int)mWeather.getHumidity()) * 2;
+        //Get temperature and corresponding colour
+        int temperature = mWeather.getTemp();
+        int color = TemperatureColors.getTemperatureColor(temperature);
+
+        //Draw temperature circle onto map
         Circle circle = mMap.addCircle(new CircleOptions()
                 .center(new LatLng(mLat, mLon))
                 .radius(2000) //in metres
                 .strokeWidth(0)
-                .fillColor(Color.argb(humidPerc, 0, 153, 255))
+                .fillColor(color)
         );
     }
 
-    //Method for capitalising each word in string
-    public String stringCapitalise(String str) {
-        String[] strArray = str.split(" ");
-        StringBuilder builder = new StringBuilder();
-        for (String s : strArray) {
-            String cap = s.substring(0, 1).toUpperCase() + s.substring(1);
-            builder.append(cap + " ");
-        }
-        str = builder.toString();
-        return str;
+
+    //Method to draw humidity info and overlay
+    public void drawHumidity() {
+
+        //Change mWeatherText to display humidity
+        mWeatherInt = 1;
+        mWeatherText.setText(Integer.toString(mWeather.getHumidity()) + "%");
+
+        //Clear map from other circles and add position marker
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
+
+        //Draw humidity circle onto map
+        int humidity = (int)(mWeather.getHumidity() * 1.5);
+        int color = Color.argb(humidity, 124,252,0);
+        Circle circle = mMap.addCircle(new CircleOptions()
+                .center(new LatLng(mLat, mLon))
+                .radius(2000) //in metres
+                .strokeWidth(0)
+                .fillColor(color)
+        );
     }
 
-    //Method used for creating fading in or out animation
-    public AlphaAnimation fadeAnimation(int fadeIn, int fadeOut){
-        AlphaAnimation animation = new AlphaAnimation(fadeIn, fadeOut);
-        animation.setDuration(500);
-        return animation;
+    //Method to draw clouds info and overlay
+    public void drawClouds() {
+
+        //Change mWeatherText to display humidity
+        mWeatherInt = 2;
+        mWeatherText.setText(Integer.toString(mWeather.getCloudPercentage()) + "%");
+
+        //Clear map from other circles and add position marker
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
+
+        //Draw humidity circle onto map
+        int clouds = (int)(mWeather.getCloudPercentage() * 1.5);
+        int color = Color.argb(clouds, 128,128,128);
+        Circle circle = mMap.addCircle(new CircleOptions()
+                .center(new LatLng(mLat, mLon))
+                .radius(2000) //in metres
+                .strokeWidth(0)
+                .fillColor(color)
+        );
     }
+
+    //Method for drawing same weather as selected before
+    public void drawWeather(){
+        if(mWeatherInt == 0 ){
+            drawTemperature();
+        } else if (mWeatherInt == 1) {
+            drawHumidity();
+        } else if (mWeatherInt == 2) {
+            drawClouds();
+        }
+    }
+
 }
