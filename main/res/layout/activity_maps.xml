@@ -129,7 +129,7 @@
         android:id="@+id/mWeatherConstraint"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -187,7 +187,7 @@
             tools:layout_constraintRight_creator="1" />
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/mCloudsButton"
+            android:id="@+id/mCloudButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -199,6 +199,22 @@
             app:layout_constraintBottom_toTopOf="@+id/mHumidityButton"
             app:layout_constraintRight_toRightOf="parent"
             app:srcCompat="@android:color/darker_gray"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintRight_creator="1" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/mPrecipitationButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:clickable="true"
+            app:backgroundTint="@android:color/white"
+            app:fabSize="normal"
+            app:layout_constraintBottom_toTopOf="@+id/mCloudButton"
+            app:layout_constraintRight_toRightOf="parent"
+            app:srcCompat="@android:color/holo_blue_light"
             tools:layout_constraintBottom_creator="1"
             tools:layout_constraintRight_creator="1" />
 

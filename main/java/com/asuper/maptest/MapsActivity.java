@@ -118,7 +118,8 @@ public class MapsActivity extends AppCompatActivity
     private FloatingActionButton mWeatherButton;
     private FloatingActionButton mTempButton;
     private FloatingActionButton mHumidityButton;
-    private FloatingActionButton mCloudsButton;
+    private FloatingActionButton mCloudButton;
+    private FloatingActionButton mPrecipitationButton;
     private TextView mDescriptionText;
     private TextView mWeatherText;
     private int mWeatherInt = 0;
@@ -286,13 +287,24 @@ public class MapsActivity extends AppCompatActivity
                 }
         );
 
-        mCloudsButton = (FloatingActionButton) findViewById(R.id.mCloudsButton);
-        mCloudsButton.setOnClickListener(
+        mCloudButton = (FloatingActionButton) findViewById(R.id.mCloudButton);
+        mCloudButton.setOnClickListener(
                 new FloatingActionButton.OnClickListener(){
 
                     @Override
                     public void onClick(View v) {
                         drawClouds();
+                    }
+                }
+        );
+
+        mPrecipitationButton = (FloatingActionButton) findViewById(R.id.mPrecipitationButton);
+        mPrecipitationButton.setOnClickListener(
+                new FloatingActionButton.OnClickListener(){
+
+                    @Override
+                    public void onClick(View v) {
+                        drawPrecipitation();
                     }
                 }
         );
@@ -869,6 +881,13 @@ public class MapsActivity extends AppCompatActivity
         );
     }
 
+    //Method to draw precipitation info and overlay
+    public void drawPrecipitation(){
+
+        //put stuff here
+
+    }
+
     //Method for drawing same weather as selected before
     public void drawWeather(){
         if(mWeatherInt == 0 ){
@@ -877,6 +896,8 @@ public class MapsActivity extends AppCompatActivity
             drawHumidity();
         } else if (mWeatherInt == 2) {
             drawClouds();
+        } else if (mWeatherInt == 3) {
+            drawPrecipitation();
         }
     }
 
