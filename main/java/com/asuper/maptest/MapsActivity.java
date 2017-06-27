@@ -527,12 +527,10 @@ public class MapsActivity extends AppCompatActivity
 
         if (mLocationPermissionGranted) {
             mMap.clear();
-            mMap.setMyLocationEnabled(true);
+            mMap.setMyLocationEnabled(false);
             mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
-            mMap.getUiSettings().setMyLocationButtonEnabled(false);
         } else {
             mMap.setMyLocationEnabled(false);
-            mMap.getUiSettings().setMyLocationButtonEnabled(false);
             mLocation = null;
         }
 
@@ -546,7 +544,6 @@ public class MapsActivity extends AppCompatActivity
         } else {
             Log.d(TAG, "Current location is null. Using defaults.");
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-            mMap.getUiSettings().setMyLocationButtonEnabled(false);
         }
     }
 
@@ -755,7 +752,6 @@ public class MapsActivity extends AppCompatActivity
     public void selectForecast(int forecastItem) throws JSONException{
 
         if(forecastItem == 0) {
-
             //Set mWeather to mPresentWeather to stop date issue
             mWeather = mPresentWeather;
             //Set textViews with their corresponding text values
