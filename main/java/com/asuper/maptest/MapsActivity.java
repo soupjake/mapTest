@@ -619,10 +619,13 @@ public class MapsActivity extends AppCompatActivity
                 weather.setWindDeg(windObj.getInt("deg"));
 
                 //Try to get rain/snow volume
-                if(weatherJSON.getJSONObject("rain") != null)
                 try{
                     JSONObject rainObj = weatherJSON.getJSONObject("rain");
                     weather.setRainVolume(rainObj.getDouble("3h"));
+                } catch (JSONException e) {
+                    //Do nothing as not needed if null
+                }
+                try{
                     JSONObject snowObj = weatherJSON.getJSONObject("snow");
                     weather.setSnowVolume(snowObj.getDouble("3h"));
                 } catch (JSONException e) {
@@ -715,12 +718,15 @@ public class MapsActivity extends AppCompatActivity
                     try{
                         JSONObject rainObj = listObj.getJSONObject("rain");
                         weatherTemp.setRainVolume(rainObj.getDouble("3h"));
+                    } catch (JSONException e) {
+                        //Do nothing as not needed if null
+                    }
+                    try{
                         JSONObject snowObj = listObj.getJSONObject("snow");
                         weatherTemp.setSnowVolume(snowObj.getDouble("3h"));
                     } catch (JSONException e) {
                         //Do nothing as not needed if null
                     }
-
 
                     //JSON Object of weather date for forecast
                     String date = (String.valueOf(listObj.get("dt_txt")));
@@ -904,7 +910,68 @@ public class MapsActivity extends AppCompatActivity
     //Method to draw precipitation info and overlay
     public void drawPrecipitation(){
 
-        //put stuff here
+        //Change mWeatherText to display precipitation
+        mWeatherInt = 3;
+
+        //Clear map from other circles and add position marker
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
+
+        //Set variables used for method
+        double precipitation = 0.0;
+        String type = "";
+        int precipitationAlpha = 0;
+
+        //Set weather info for forecast weather
+        if (mWeather.getRainVolume() != 0.0) {
+            type = "Rain";
+            precipitation = Format.roundVolume(mWeather.getRainVolume());
+            mWeatherText.setText(Double.toString(precipitation) + "mm/3h");
+        } else if (mWeather.getSnowVolume() != 0.0) {
+            type = "Snow";
+            precipitation = Format.roundVolume(mWeather.getSnowVolume());
+            mWeatherText.setText(Double.toString(precipitation) + "mm/3h");
+        } else {
+            mWeatherText.setText("");
+        }
+
+        //Selecting opacity of circle depending on volume
+        if (precipitation == 0.0){
+            precipitationAlpha = 0;
+        } else if(precipitation < 1.0) {
+            precipitationAlpha = 50;
+        } else if(precipitation < 4.0) {
+            precipitationAlpha = 75;
+        } else if(precipitation < 8.0) {
+            precipitationAlpha = 100;
+        } else if(precipitation < 16.0) {
+            precipitationAlpha = 125;
+        } else if(precipitation > 16.0) {
+            precipitationAlpha = 150;
+        }
+
+        //Make colour blue by default as rain more common
+        int color = Color.argb(precipitationAlpha, 0,191,255);
+
+        //Make colour white if type is snow
+        if (type.equals("Snow")){
+            color = Color.argb(precipitationAlpha, 255,255,255);
+        }
+
+        //Set overlay color if currently raining/snowing
+        if (mWeather.getDate().equals("Present") && mWeather.getCondition().equals("Rain")){
+            color = Color.argb(75, 0, 191, 255);
+        } else if (mWeather.getDate().equals("Present") && mWeather.getCondition().equals("Snow")){
+            color = Color.argb(75, 255, 255, 255);
+        }
+
+        //Draw precipitation circle onto map
+        Circle circle = mMap.addCircle(new CircleOptions()
+                        .center(new LatLng(mLat, mLon))
+                        .radius(2000) //in metres
+                        .strokeWidth(0)
+                        .fillColor(color)
+        );
 
     }
 
@@ -913,6 +980,10 @@ public class MapsActivity extends AppCompatActivity
 
         //Change mWeatherText to display humidity
         mWeatherInt = 4;
+
+        //Clear map from other circles and add position marker
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
 
         //Get windDeg and change to string
         int windDeg = mWeather.getWindDeg();

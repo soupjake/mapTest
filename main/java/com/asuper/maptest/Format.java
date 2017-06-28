@@ -1,5 +1,6 @@
 package com.asuper.maptest;
 
+import android.icu.math.BigDecimal;
 import android.view.animation.AlphaAnimation;
 
 /**
@@ -54,6 +55,17 @@ public class Format {
 
             return formattedDate;
         }
+    }
+
+    //Method for rounding precipitation volumes to 3 decimal places
+    public static double roundVolume(double volume){
+
+        //Code from: https://stackoverflow.com/questions/2808535/round-a-double-to-2-decimal-places
+        long factor = (long)Math.pow(10, 3);
+        volume *= factor;
+        long temp = Math.round(volume);
+        return (double) temp/factor;
+
     }
 
     //Method used for creating fading in or out animation
