@@ -15,8 +15,8 @@ public class Weather {
     private int temp;
     private int pressure;
     private int humidity;
-    private double windSpeed;
-    private double windDeg;
+    private int windSpeed;
+    private int windDeg;
     private int cloudPercentage;
     private double rainVolume;
     private double snowVolume;
@@ -85,19 +85,19 @@ public class Weather {
         this.temp = temp;
     }
 
-    public double getWindSpeed() {
+    public int getWindSpeed() {
         return windSpeed;
     }
 
-    public void setWindSpeed(double windSpeed) {
+    public void setWindSpeed(int windSpeed) {
         this.windSpeed = windSpeed;
     }
 
-    public double getWindDeg() {
+    public int getWindDeg() {
         return windDeg;
     }
 
-    public void setWindDeg(double windDeg) {
+    public void setWindDeg(int windDeg) {
         this.windDeg = windDeg;
     }
 

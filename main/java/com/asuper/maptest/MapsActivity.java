@@ -11,6 +11,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -69,7 +70,6 @@ public class MapsActivity extends AppCompatActivity
 
     //Weather object used for overlay
     private Weather mWeather = new Weather();
-    private Weather mPresentWeather = new Weather();
 
     //Vector to store forecast information
     private Vector<Weather> mWeatherVec = new Vector<>();
@@ -121,6 +121,7 @@ public class MapsActivity extends AppCompatActivity
     private FloatingActionButton mHumidityButton;
     private FloatingActionButton mCloudButton;
     private FloatingActionButton mPrecipitationButton;
+    private FloatingActionButton mWindButton;
     private TextView mDescriptionText;
     private TextView mWeatherText;
     private int mWeatherInt = 0;
@@ -129,8 +130,8 @@ public class MapsActivity extends AppCompatActivity
     //Forecast ard variables
     private ConstraintLayout mWeatherConstraint;
     private TextView mDateText;
-    private Button mMinusButton;
-    private Button mPlusButton;
+    private Button mLeftButton;
+    private Button mRightButton;
     private int mWeatherSelection = 0;
 
     @Override
@@ -209,10 +210,10 @@ public class MapsActivity extends AppCompatActivity
         mWeatherConstraint = (ConstraintLayout) findViewById(R.id.mWeatherConstraint);
         mWeatherConstraint.setEnabled(false);
         mDateText = (TextView) findViewById(R.id.mDateText);
-        mMinusButton = (Button) findViewById(R.id.mMinusButton);
-        mMinusButton.setEnabled(false);
-        mMinusButton.setTextColor(Color.TRANSPARENT);
-        mMinusButton.setOnClickListener(new View.OnClickListener(){
+        mLeftButton = (Button) findViewById(R.id.mLeftButton);
+        mLeftButton.setEnabled(false);
+        mLeftButton.setTextColor(Color.TRANSPARENT);
+        mLeftButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
@@ -227,8 +228,8 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        mPlusButton = (Button) findViewById(R.id.mPlusButton);
-        mPlusButton.setOnClickListener(new View.OnClickListener(){
+        mRightButton = (Button) findViewById(R.id.mRightButton);
+        mRightButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
@@ -251,7 +252,6 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
 
-                        //drawOverlay();
                         if(mWeatherConstraint.isEnabled()){
                             mWeatherConstraint.setAnimation(Format.fadeAnimation(1, 0));
                             mWeatherConstraint.setVisibility(View.GONE);
@@ -294,7 +294,7 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(View v) {
-                        drawClouds();
+                        drawCloud();
                     }
                 }
         );
@@ -306,6 +306,17 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
                         drawPrecipitation();
+                    }
+                }
+        );
+
+        mWindButton = (FloatingActionButton) findViewById(R.id.mWindButton);
+        mWindButton.setOnClickListener(
+                new FloatingActionButton.OnClickListener(){
+
+                    @Override
+                    public void onClick(View v) {
+                        drawWind();
                     }
                 }
         );
@@ -602,6 +613,11 @@ public class MapsActivity extends AppCompatActivity
                 JSONObject cloudObj = weatherJSON.getJSONObject("clouds");
                 weather.setCloudPercentage(cloudObj.getInt("all"));
 
+                //Get wind speed and direction
+                JSONObject windObj = weatherJSON.getJSONObject("wind");
+                weather.setWindSpeed((int)Math.round(windObj.getDouble("speed")));
+                weather.setWindDeg(windObj.getInt("deg"));
+
                 //Try to get rain/snow volume
                 if(weatherJSON.getJSONObject("rain") != null)
                 try{
@@ -610,9 +626,8 @@ public class MapsActivity extends AppCompatActivity
                     JSONObject snowObj = weatherJSON.getJSONObject("snow");
                     weather.setSnowVolume(snowObj.getDouble("3h"));
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    //Do nothing as not needed if null
                 }
-                mWeatherVec.add(weather);
 
                 urlConnection.disconnect();
             } catch (IOException | JSONException e) {
@@ -625,9 +640,10 @@ public class MapsActivity extends AppCompatActivity
         protected void onPostExecute(Weather weather) {
             super.onPostExecute(weather);
 
+            mWeatherVec.add(weather);
+
             //Set global weather object based on location
             mWeather = weather;
-            mPresentWeather = weather;
 
             mCountryFilter = new AutocompleteFilter.Builder()
                     .setCountry(weather.getCountryCode())
@@ -690,6 +706,11 @@ public class MapsActivity extends AppCompatActivity
                     JSONObject cloudObj = listObj.getJSONObject("clouds");
                     weatherTemp.setCloudPercentage(cloudObj.getInt("all"));
 
+                    //Get wind speed and direction
+                    JSONObject windObj = listObj.getJSONObject("wind");
+                    weatherTemp.setWindSpeed((int)Math.round(windObj.getDouble("speed")));
+                    weatherTemp.setWindDeg(windObj.getInt("deg"));
+
                     //Try to get rain/snow volume
                     try{
                         JSONObject rainObj = listObj.getJSONObject("rain");
@@ -697,7 +718,7 @@ public class MapsActivity extends AppCompatActivity
                         JSONObject snowObj = listObj.getJSONObject("snow");
                         weatherTemp.setSnowVolume(snowObj.getDouble("3h"));
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        //Do nothing as not needed if null
                     }
 
 
@@ -723,15 +744,14 @@ public class MapsActivity extends AppCompatActivity
         protected void onPostExecute(Weather weather) {
             super.onPostExecute(weather);
 
-
             Log.i(TAG, "Weather and Forecast loaded successfully!");
 
             //Reset forecast Selection CardView
             mWeatherSelection = 0;
-            mMinusButton.setEnabled(false);
-            mMinusButton.setTextColor(Color.TRANSPARENT);
-            mPlusButton.setEnabled(true);
-            mPlusButton.setTextColor(Color.GRAY);
+            mLeftButton.setEnabled(false);
+            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
+            mRightButton.setEnabled(true);
+            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_keyboard_arrow_right_grey_24dp, null));
         }
 
     }
@@ -751,35 +771,30 @@ public class MapsActivity extends AppCompatActivity
     //Method for getting forecast weather
     public void selectForecast(int forecastItem) throws JSONException{
 
-        if(forecastItem == 0) {
-            //Set mWeather to mPresentWeather to stop date issue
-            mWeather = mPresentWeather;
-            //Set textViews with their corresponding text values
-            mDateText.setText(Format.formatDate(mWeather.getDate()));
-            mDescriptionText.setText(mWeather.getDescription());
-        } else {
-            mWeather = mWeatherVec.get(forecastItem);
-            mDateText.setText(Format.formatDate(mWeather.getDate()));
-            mDescriptionText.setText(mWeather.getDescription());
-        }
+        //Set mWeather to corresponding item in weather vector
+        mWeather = mWeatherVec.get(forecastItem);
+
+        //Set date and weather description text
+        mDateText.setText(Format.formatDate(mWeather.getDate()));
+        mDescriptionText.setText(mWeather.getDescription());
 
         //Draw weather
         drawWeather();
 
         //Set forecast buttons to be disabled or enabled based on mWeatherSelection
         if(mWeatherSelection > 0){
-            mMinusButton.setEnabled(true);
-            mMinusButton.setTextColor(Color.GRAY);
+            mLeftButton.setEnabled(true);
+            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_keyboard_arrow_left_grey_24dp, null));
         } else {
-            mMinusButton.setEnabled(false);
-            mMinusButton.setTextColor(Color.TRANSPARENT);
+            mLeftButton.setEnabled(false);
+            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
         }
         if(mWeatherSelection == (mWeatherVec.size()-1)){
-            mPlusButton.setEnabled(false);
-            mPlusButton.setTextColor(Color.TRANSPARENT);
+            mRightButton.setEnabled(false);
+            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
         } else {
-            mPlusButton.setEnabled(true);
-            mPlusButton.setTextColor(Color.GRAY);
+            mRightButton.setEnabled(true);
+            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_keyboard_arrow_right_grey_24dp, null));
         }
 
     }
@@ -865,7 +880,7 @@ public class MapsActivity extends AppCompatActivity
     }
 
     //Method to draw clouds info and overlay
-    public void drawClouds() {
+    public void drawCloud() {
 
         //Change mWeatherText to display humidity
         mWeatherInt = 2;
@@ -893,6 +908,42 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
+    //Method to draw clouds info and overlay
+    public void drawWind() {
+
+        //Change mWeatherText to display humidity
+        mWeatherInt = 4;
+
+        //Get windDeg and change to string
+        int windDeg = mWeather.getWindDeg();
+        String windDirection = "";
+
+        //Get string direction from wind degrees via 8 point compass
+        if(windDeg < 23){
+            windDirection = "N";
+        } else if(windDeg < 68){
+            windDirection = "NE";
+        } else if(windDeg < 113){
+            windDirection = "E";
+        } else if(windDeg < 158){
+            windDirection = "SE";
+        } else if(windDeg < 203){
+            windDirection = "S";
+        } else if(windDeg < 248){
+            windDirection = "SW";
+        } else if(windDeg < 293){
+            windDirection = "W";
+        } else if(windDeg < 338){
+            windDirection = "NW";
+        } else if(windDeg > 338){
+            windDirection = "N";
+        }
+
+        //Set mWeatherText
+        mWeatherText.setText(mWeather.getWindDeg() + "m/s" + " " + windDirection);
+
+    }
+
     //Method for drawing same weather as selected before
     public void drawWeather(){
         if(mWeatherInt == 0 ){
@@ -900,9 +951,11 @@ public class MapsActivity extends AppCompatActivity
         } else if (mWeatherInt == 1) {
             drawHumidity();
         } else if (mWeatherInt == 2) {
-            drawClouds();
+            drawCloud();
         } else if (mWeatherInt == 3) {
             drawPrecipitation();
+        } else if (mWeatherInt == 4) {
+            drawWind();
         }
     }
 
