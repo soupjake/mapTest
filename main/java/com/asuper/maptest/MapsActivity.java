@@ -99,8 +99,8 @@ public class MapsActivity extends AppCompatActivity
     private double mLon;
 
     // Keys for storing activity state.
-    private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
+    private static final String KEY_SELECTION = "mWeatherSelection";
 
     // Used for selecting the current place.
     private final int mMaxEntries = 5;
@@ -126,7 +126,7 @@ public class MapsActivity extends AppCompatActivity
     private FloatingActionButton mWindButton;
     private TextView mDescriptionText;
     private TextView mWeatherText;
-    private int mWeatherInt = 0;
+    private int mWeatherSelection;
 
 
     //Forecast ard variables
@@ -134,7 +134,7 @@ public class MapsActivity extends AppCompatActivity
     private TextView mDateText;
     private Button mLeftButton;
     private Button mRightButton;
-    private int mWeatherSelection = 0;
+    private int mForecastSelection = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,12 +143,13 @@ public class MapsActivity extends AppCompatActivity
         // Retrieve location and camera position from saved instance state.
         if (savedInstanceState != null) {
             mLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
+            mLat = mLocation.getLatitude();
+            mLon = mLocation.getLongitude();
+            mWeatherSelection = savedInstanceState.getInt(KEY_SELECTION);
         }
 
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
-
 
         // Build the Play services client for use by the Fused Location Provider and the Places API.
         // Use the addApi() method to request the Google Places API and the Fused Location Provider.
@@ -219,11 +220,11 @@ public class MapsActivity extends AppCompatActivity
 
             @Override
             public void onClick(View v) {
-                if (mWeatherSelection != 0){
-                    --mWeatherSelection;
+                if (mForecastSelection != 0){
+                    --mForecastSelection;
                 }
                 try{
-                    selectForecast(mWeatherSelection);
+                    selectForecast(mForecastSelection);
                 } catch (IndexOutOfBoundsException | JSONException e){
                     e.printStackTrace();
                 }
@@ -235,11 +236,11 @@ public class MapsActivity extends AppCompatActivity
 
             @Override
             public void onClick(View v) {
-                if (mWeatherSelection != (mWeatherVec.size()-1)){
-                    ++mWeatherSelection;
+                if (mForecastSelection != (mWeatherVec.size()-1)){
+                    ++mForecastSelection;
                 }
                 try{
-                    selectForecast(mWeatherSelection);
+                    selectForecast(mForecastSelection);
                 } catch (IndexOutOfBoundsException | JSONException e){
                     e.printStackTrace();
                 }
@@ -352,9 +353,9 @@ public class MapsActivity extends AppCompatActivity
      */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (mMap != null) {
-            outState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
+        if(mMap != null){
             outState.putParcelable(KEY_LOCATION, mLocation);
+            outState.putInt(KEY_SELECTION, mWeatherSelection);
             super.onSaveInstanceState(outState);
         }
     }
@@ -421,26 +422,6 @@ public class MapsActivity extends AppCompatActivity
     public void onMapReady(GoogleMap map) {
         mMap = map;
 
-        //Click listener to update location based on clicking on map
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                mLat = latLng.latitude;
-                mLon = latLng.longitude;
-                mLocation.setLatitude(mLat);
-                mLocation.setLongitude(mLon);
-
-                //update map's location to place location
-                updateLocationUI();
-
-                //Get weather for place
-                getWeather();
-
-                //Draw weather
-                drawWeather();
-            }
-        });
-
         // Use a custom info window adapter to handle multiple lines of text in the
         // info window contents.
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
@@ -468,7 +449,9 @@ public class MapsActivity extends AppCompatActivity
         });
 
         // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
+        if (mLocation == null){
+            getDeviceLocation();
+        }
 
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
@@ -482,6 +465,26 @@ public class MapsActivity extends AppCompatActivity
         } else {
             Log.i(TAG, "location is null");
         }
+
+        //Click listener to update location based on clicking on map
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                mLat = latLng.latitude;
+                mLon = latLng.longitude;
+                mLocation.setLatitude(mLat);
+                mLocation.setLongitude(mLon);
+
+                //update map's location to place location
+                updateLocationUI();
+
+                //Get weather for place
+                getWeather();
+
+                //Draw weather
+                drawWeather();
+            }
+        });
     }
 
     /**
@@ -534,8 +537,6 @@ public class MapsActivity extends AppCompatActivity
         }
         updateLocationUI();
     }
-
-
 
     /**
      * Updates the map's UI settings based on whether the user has granted location permission.
@@ -774,10 +775,8 @@ public class MapsActivity extends AppCompatActivity
         protected void onPostExecute(Weather weather) {
             super.onPostExecute(weather);
 
-            Log.i(TAG, "Weather and Forecast loaded successfully!");
-
             //Reset forecast Selection CardView
-            mWeatherSelection = 0;
+            mForecastSelection = 0;
             mLeftButton.setEnabled(false);
             mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
             mRightButton.setEnabled(true);
@@ -790,6 +789,7 @@ public class MapsActivity extends AppCompatActivity
     public void getWeather() {
 
         //Set weather text to say loading
+        mStationNameText.setText("Getting station...");
         mDescriptionText.setText("Getting weather...");
         mWeatherText.setText("");
 
@@ -822,14 +822,14 @@ public class MapsActivity extends AppCompatActivity
         drawWeather();
 
         //Set forecast buttons to be disabled or enabled based on mWeatherSelection
-        if(mWeatherSelection > 0){
+        if(mForecastSelection > 0){
             mLeftButton.setEnabled(true);
             mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_left, null));
         } else {
             mLeftButton.setEnabled(false);
             mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
         }
-        if(mWeatherSelection == (mWeatherVec.size()-1)){
+        if(mForecastSelection == (mWeatherVec.size()-1)){
             mRightButton.setEnabled(false);
             mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
         } else {
@@ -876,7 +876,7 @@ public class MapsActivity extends AppCompatActivity
     public void drawTemperature() {
 
         //Change mWeatherText to display humidity
-        mWeatherInt = 0;
+        mWeatherSelection = 0;
         mWeatherText.setText((Integer.toString(mWeather.getTemp()) + mDegrees + "C"));
 
         //Clear map from other circles and add position marker
@@ -909,7 +909,7 @@ public class MapsActivity extends AppCompatActivity
     public void drawHumidity() {
 
         //Change mWeatherText to display humidity
-        mWeatherInt = 1;
+        mWeatherSelection = 1;
         mWeatherText.setText(Integer.toString(mWeather.getHumidity()) + "%");
 
         //Clear map from other circles and add position marker
@@ -939,7 +939,7 @@ public class MapsActivity extends AppCompatActivity
     public void drawCloud() {
 
         //Change mWeatherText to display humidity
-        mWeatherInt = 2;
+        mWeatherSelection = 2;
         mWeatherText.setText(Integer.toString(mWeather.getCloudPercentage()) + "%");
 
         //Clear map from other circles and add position marker
@@ -969,7 +969,7 @@ public class MapsActivity extends AppCompatActivity
     public void drawPrecipitation(){
 
         //Change mWeatherText to display precipitation
-        mWeatherInt = 3;
+        mWeatherSelection = 3;
 
         //Clear map from other circles and add position marker
         mMap.clear();
@@ -1046,7 +1046,7 @@ public class MapsActivity extends AppCompatActivity
     public void drawWind() {
 
         //Change mWeatherText to display humidity
-        mWeatherInt = 4;
+        mWeatherSelection = 4;
 
         //Clear map from other circles and add position marker
         mMap.clear();
@@ -1091,15 +1091,15 @@ public class MapsActivity extends AppCompatActivity
 
     //Method for drawing same weather as selected before
     public void drawWeather(){
-        if(mWeatherInt == 0 ){
+        if(mWeatherSelection == 0 ){
             drawTemperature();
-        } else if (mWeatherInt == 1) {
+        } else if (mWeatherSelection == 1) {
             drawHumidity();
-        } else if (mWeatherInt == 2) {
+        } else if (mWeatherSelection == 2) {
             drawCloud();
-        } else if (mWeatherInt == 3) {
+        } else if (mWeatherSelection == 3) {
             drawPrecipitation();
-        } else if (mWeatherInt == 4) {
+        } else if (mWeatherSelection == 4) {
             drawWind();
         }
     }
