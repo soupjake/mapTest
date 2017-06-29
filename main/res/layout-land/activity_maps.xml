@@ -12,7 +12,7 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/mToolbar"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:background="@color/colorAppBar"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
@@ -69,17 +69,15 @@
     <android.support.v7.widget.CardView
         android:id="@+id/mWeatherCard"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:layout_gravity="top"
-        android:layout_marginEnd="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         app:cardCornerRadius="4dp"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/mPlaceHolderTextView1"
         app:layout_constraintTop_toBottomOf="@+id/mToolbar"
         tools:layout_constraintLeft_creator="1"
         tools:layout_constraintRight_creator="1">
@@ -106,6 +104,22 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
     </android.support.v7.widget.CardView>
+
+    <TextView
+        android:id="@+id/mPlaceHolderTextView1"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:visibility="invisible"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintLeft_toRightOf="@+id/mWeatherCard"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mToolbar"
+        tools:layout_constraintLeft_creator="1"
+        tools:layout_constraintRight_creator="1" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/mWeatherButton"
@@ -210,8 +224,8 @@
             android:clickable="true"
             app:backgroundTint="@color/cardview_light_background"
             app:fabSize="normal"
-            app:layout_constraintBottom_toTopOf="@+id/mCloudButton"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/mTempButton"
+            app:layout_constraintBottom_toTopOf="@id/mForecastCard"
             app:srcCompat="@drawable/ic_precipitation"
             tools:layout_constraintBottom_creator="1"
             tools:layout_constraintRight_creator="1" />
@@ -227,24 +241,37 @@
             app:backgroundTint="@color/cardview_light_background"
             app:fabSize="normal"
             app:layout_constraintBottom_toTopOf="@+id/mPrecipitationButton"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/mHumidityButton"
             app:srcCompat="@drawable/ic_wind"
             tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintRight_creator="1" />
+
+        <TextView
+            android:id="@+id/mPlaceHolderTextView2"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_gravity="top"
+            android:layout_marginLeft="16dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="invisible"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintRight_toLeftOf="@+id/mForecastCard"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:layout_constraintLeft_creator="1"
             tools:layout_constraintRight_creator="1" />
 
         <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:id="@+id/mForecastCard"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="48dp"
             android:layout_gravity="bottom"
             android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginLeft="32dp"
             android:clickable="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/mPlaceHolderTextView2"
             app:layout_constraintRight_toLeftOf="@+id/mPlaceHolderButton"
             card_view:cardCornerRadius="4dp"
             tools:layout_constraintBottom_creator="1"
@@ -277,6 +304,7 @@
                 android:background="@drawable/ic_arrow_right" />
 
         </android.support.v7.widget.CardView>
+
     </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

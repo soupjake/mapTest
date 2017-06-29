@@ -788,14 +788,24 @@ public class MapsActivity extends AppCompatActivity
 
     //Method to getting weather
     public void getWeather() {
+
+        //Set weather text to say loading
+        mDescriptionText.setText("Getting weather...");
+        mWeatherText.setText("");
+
+        //Get present weather
         String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + mLat + "&lon=" + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
         new WeatherTask().execute(url);
+
     }
 
     //Method to getting forecast
     public void getForecast() {
+
+        //Get forecast weather
         String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + mLat + "&lon=" + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
         new ForecastTask().execute(url);
+
     }
 
     //Method for getting forecast weather
@@ -1093,5 +1103,4 @@ public class MapsActivity extends AppCompatActivity
             drawWind();
         }
     }
-
 }

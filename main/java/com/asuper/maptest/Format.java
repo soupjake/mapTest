@@ -1,8 +1,6 @@
 package com.asuper.maptest;
 
 import android.content.res.Resources;
-import android.icu.math.BigDecimal;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.animation.AlphaAnimation;
 
