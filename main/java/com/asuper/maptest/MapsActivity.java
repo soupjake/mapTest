@@ -16,11 +16,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +39,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -101,13 +97,6 @@ public class MapsActivity extends AppCompatActivity
     // Keys for storing activity state.
     private static final String KEY_LOCATION = "location";
     private static final String KEY_SELECTION = "mWeatherSelection";
-
-    // Used for selecting the current place.
-    private final int mMaxEntries = 5;
-    private String[] mLikelyPlaceNames = new String[mMaxEntries];
-    private String[] mLikelyPlaceAddresses = new String[mMaxEntries];
-    private String[] mLikelyPlaceAttributions = new String[mMaxEntries];
-    private LatLng[] mLikelyPlaceLatLngs = new LatLng[mMaxEntries];
 
     //AppBar variables
     private Toolbar mToolbar;
@@ -391,27 +380,37 @@ public class MapsActivity extends AppCompatActivity
     }
 
     /**
-     * Sets up the options menu.
-     * @param menu The options menu.
-     * @return Boolean.
+     * Handles the result of the request for location permissions.
      */
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        return true;
-    }
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                    // Get the current location of the device and set the position of the map.
+                    getDeviceLocation();
 
-    /**
-     * Handles a click on the menu option to get a place.
-     * @param item The menu item to handle.
-     * @return Boolean.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.option_get_place) {
-            //showCurrentPlace();
+                    // Turn on the My Location layer and the related control on the map.
+                    updateLocationUI();
+
+                    //Use location to run Weather Task to get weather info
+                    if (mLocation != null) {
+
+                        //Get weather of location
+                        getWeather();
+
+                    } else {
+                        Log.i(TAG, "location is null");
+                    }
+                }
+            }
         }
-        return true;
     }
 
     /**
@@ -421,32 +420,6 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
-
-        // Use a custom info window adapter to handle multiple lines of text in the
-        // info window contents.
-        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-
-            @Override
-            // Return null here, so that getInfoContents() is called next.
-            public View getInfoWindow(Marker arg0) {
-                return null;
-            }
-
-            @Override
-            public View getInfoContents(Marker marker) {
-                // Inflate the layouts for the info window, title and snippet.
-                View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_contents,
-                        (FrameLayout)findViewById(R.id.map), false);
-
-                TextView title = ((TextView) infoWindow.findViewById(R.id.title));
-                title.setText("MapTest");
-
-                TextView snippet = ((TextView) infoWindow.findViewById(R.id.snippet));
-                snippet.setText(marker.getSnippet());
-
-                return infoWindow;
-            }
-        });
 
         // Get the current location of the device and set the position of the map.
         if (mLocation == null){
@@ -516,26 +489,6 @@ public class MapsActivity extends AppCompatActivity
             mLat = mLocation.getLatitude();
             mLon = mLocation.getLongitude();
         }
-    }
-
-    /**
-     * Handles the result of the request for location permissions.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        mLocationPermissionGranted = false;
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
-                }
-            }
-        }
-        updateLocationUI();
     }
 
     /**
