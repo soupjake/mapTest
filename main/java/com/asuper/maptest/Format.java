@@ -1,6 +1,9 @@
 package com.asuper.maptest;
 
+import android.content.res.Resources;
 import android.icu.math.BigDecimal;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.animation.AlphaAnimation;
 
 /**
@@ -66,6 +69,12 @@ public class Format {
         long temp = Math.round(volume);
         return (double) temp/factor;
 
+    }
+
+    //Method for converting dp to pixel
+    public static int dpToPx(int dp){
+        float floatPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, Resources.getSystem().getDisplayMetrics());
+        return Math.round(floatPx);
     }
 
     //Method used for creating fading in or out animation

@@ -15,12 +15,14 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -253,10 +255,12 @@ public class MapsActivity extends AppCompatActivity
                     public void onClick(View v) {
 
                         if(mWeatherConstraint.isEnabled()){
+                            mWeatherButton.setImageResource(R.drawable.ic_weather);
                             mWeatherConstraint.setAnimation(Format.fadeAnimation(1, 0));
                             mWeatherConstraint.setVisibility(View.GONE);
                             mWeatherConstraint.setEnabled(false);
                         } else {
+                            mWeatherButton.setImageResource(R.drawable.ic_weather_enabled);
                             mWeatherConstraint.setAnimation(Format.fadeAnimation(0, 1));
                             mWeatherConstraint.setVisibility(View.VISIBLE);
                             mWeatherConstraint.setEnabled(true);
@@ -273,6 +277,10 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
                         drawTemperature();
+                        //Draw toast to say weather type being displayed
+                        Toast toast = Toast.makeText(getApplicationContext(), "Temperature", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
+                        toast.show();
                     }
                 }
         );
@@ -284,6 +292,10 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
                         drawHumidity();
+                        //Draw toast to say weather type being displayed
+                        Toast toast = Toast.makeText(getApplicationContext(), "Humidity", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
+                        toast.show();
                     }
                 }
         );
@@ -295,6 +307,10 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
                         drawCloud();
+                        //Draw toast to say weather type being displayed
+                        Toast toast = Toast.makeText(getApplicationContext(), "Clouds", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
+                        toast.show();
                     }
                 }
         );
@@ -306,6 +322,10 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
                         drawPrecipitation();
+                        //Draw toast to say weather type being displayed
+                        Toast toast = Toast.makeText(getApplicationContext(), "Precipitation", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
+                        toast.show();
                     }
                 }
         );
@@ -317,6 +337,10 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
                         drawWind();
+                        //Draw toast to say weather type being displayed
+                        Toast toast = Toast.makeText(getApplicationContext(), "Wind", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
+                        toast.show();
                     }
                 }
         );
@@ -757,7 +781,7 @@ public class MapsActivity extends AppCompatActivity
             mLeftButton.setEnabled(false);
             mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
             mRightButton.setEnabled(true);
-            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_keyboard_arrow_right_grey_24dp, null));
+            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_right, null));
         }
 
     }
@@ -790,7 +814,7 @@ public class MapsActivity extends AppCompatActivity
         //Set forecast buttons to be disabled or enabled based on mWeatherSelection
         if(mWeatherSelection > 0){
             mLeftButton.setEnabled(true);
-            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_keyboard_arrow_left_grey_24dp, null));
+            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_left, null));
         } else {
             mLeftButton.setEnabled(false);
             mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
@@ -800,7 +824,7 @@ public class MapsActivity extends AppCompatActivity
             mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
         } else {
             mRightButton.setEnabled(true);
-            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_keyboard_arrow_right_grey_24dp, null));
+            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_right, null));
         }
 
     }
@@ -838,7 +862,7 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    //Method to draw humidity info and overlay
+    //Method to draw temperature info and overlay
     public void drawTemperature() {
 
         //Change mWeatherText to display humidity
@@ -860,6 +884,14 @@ public class MapsActivity extends AppCompatActivity
                 .strokeWidth(0)
                 .fillColor(color)
         );
+
+        //Set weather FAB images
+        mTempButton.setImageResource(R.drawable.ic_thermometer_enabled);
+        mHumidityButton.setImageResource(R.drawable.ic_humidity);
+        mCloudButton.setImageResource(R.drawable.ic_cloud);
+        mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
+        mWindButton.setImageResource(R.drawable.ic_wind);
+
     }
 
 
@@ -883,9 +915,17 @@ public class MapsActivity extends AppCompatActivity
                 .strokeWidth(0)
                 .fillColor(color)
         );
+
+        //Set weather FAB images
+        mTempButton.setImageResource(R.drawable.ic_thermometer);
+        mHumidityButton.setImageResource(R.drawable.ic_humidity_enabled);
+        mCloudButton.setImageResource(R.drawable.ic_cloud);
+        mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
+        mWindButton.setImageResource(R.drawable.ic_wind);
+
     }
 
-    //Method to draw clouds info and overlay
+    //Method to draw cloud info and overlay
     public void drawCloud() {
 
         //Change mWeatherText to display humidity
@@ -905,6 +945,14 @@ public class MapsActivity extends AppCompatActivity
                 .strokeWidth(0)
                 .fillColor(color)
         );
+
+        //Set weather FAB images
+        mTempButton.setImageResource(R.drawable.ic_thermometer);
+        mHumidityButton.setImageResource(R.drawable.ic_humidity);
+        mCloudButton.setImageResource(R.drawable.ic_cloud_enabled);
+        mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
+        mWindButton.setImageResource(R.drawable.ic_wind);
+
     }
 
     //Method to draw precipitation info and overlay
@@ -932,7 +980,7 @@ public class MapsActivity extends AppCompatActivity
             precipitation = Format.roundVolume(mWeather.getSnowVolume());
             mWeatherText.setText(Double.toString(precipitation) + "mm/3h");
         } else {
-            mWeatherText.setText("");
+            mWeatherText.setText("0mm/3h");
         }
 
         //Selecting opacity of circle depending on volume
@@ -961,8 +1009,10 @@ public class MapsActivity extends AppCompatActivity
         //Set overlay color if currently raining/snowing
         if (mWeather.getDate().equals("Present") && mWeather.getCondition().equals("Rain")){
             color = Color.argb(75, 0, 191, 255);
+            mWeatherText.setText("");
         } else if (mWeather.getDate().equals("Present") && mWeather.getCondition().equals("Snow")){
             color = Color.argb(75, 255, 255, 255);
+            mWeatherText.setText("");
         }
 
         //Draw precipitation circle onto map
@@ -973,9 +1023,16 @@ public class MapsActivity extends AppCompatActivity
                         .fillColor(color)
         );
 
+        //Set weather FAB images
+        mTempButton.setImageResource(R.drawable.ic_thermometer);
+        mHumidityButton.setImageResource(R.drawable.ic_humidity);
+        mCloudButton.setImageResource(R.drawable.ic_cloud);
+        mPrecipitationButton.setImageResource(R.drawable.ic_precipitation_enabled);
+        mWindButton.setImageResource(R.drawable.ic_wind);
+
     }
 
-    //Method to draw clouds info and overlay
+    //Method to draw wind info and overlay
     public void drawWind() {
 
         //Change mWeatherText to display humidity
@@ -1012,6 +1069,13 @@ public class MapsActivity extends AppCompatActivity
 
         //Set mWeatherText
         mWeatherText.setText(mWeather.getWindDeg() + "m/s" + " " + windDirection);
+
+        //Set weather FAB images
+        mTempButton.setImageResource(R.drawable.ic_thermometer);
+        mHumidityButton.setImageResource(R.drawable.ic_humidity);
+        mCloudButton.setImageResource(R.drawable.ic_cloud);
+        mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
+        mWindButton.setImageResource(R.drawable.ic_wind_enabled);
 
     }
 

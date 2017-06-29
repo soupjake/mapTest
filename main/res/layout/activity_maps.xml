@@ -36,7 +36,7 @@
             android:layout_height="32dp"
             android:layout_gravity="right"
             android:layout_marginRight="8dp"
-            android:background="@drawable/ic_my_location_rename_24dp" />
+            android:background="@drawable/ic_my_location" />
 
         <Button
             android:id="@+id/mSearchButton"
@@ -44,7 +44,7 @@
             android:layout_height="32dp"
             android:layout_gravity="right"
             android:layout_marginRight="8dp"
-            android:background="@drawable/ic_search_grey_24dp" />
+            android:background="@drawable/ic_search" />
 
     </android.support.v7.widget.Toolbar>
 
@@ -119,7 +119,7 @@
         app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@drawable/ic_brightness_6_grey_24dp"
+        app:srcCompat="@drawable/ic_weather"
         tools:layout_constraintBottom_creator="1"
         tools:layout_constraintRight_creator="1" />
 
@@ -196,7 +196,7 @@
             app:fabSize="normal"
             app:layout_constraintBottom_toTopOf="@+id/mHumidityButton"
             app:layout_constraintRight_toRightOf="parent"
-            app:srcCompat="@drawable/ic_cloud_queue_grey_24dp"
+            app:srcCompat="@drawable/ic_cloud"
             tools:layout_constraintBottom_creator="1"
             tools:layout_constraintRight_creator="1" />
 
@@ -273,7 +273,7 @@
                 android:layout_height="40dp"
                 android:layout_margin="8dp"
                 android:layout_gravity="center_vertical|right"
-                android:background="@drawable/ic_keyboard_arrow_right_grey_24dp" />
+                android:background="@drawable/ic_arrow_right" />
 
         </android.support.v7.widget.CardView>
     </android.support.constraint.ConstraintLayout>
