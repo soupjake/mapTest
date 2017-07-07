@@ -1,9 +1,12 @@
 package com.asuper.maptest;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,8 +43,6 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.PolygonOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,9 +50,14 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
@@ -73,7 +79,6 @@ public class MapsActivity extends AppCompatActivity
 
     //Vector to store forecast information
     private Vector<Weather> mWeatherVec = new Vector<>();
-    private Vector<LatLng> mBoundaryVec = new Vector<>();
 
     //String variable to set unit type
     private String mUnits = "metric";
@@ -134,11 +139,12 @@ public class MapsActivity extends AppCompatActivity
 
         // Retrieve location and camera position from saved instance state.
         if (savedInstanceState != null) {
-            mLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            mLat = mLocation.getLatitude();
-            mLon = mLocation.getLongitude();
-            mWeatherSelection = savedInstanceState.getInt(KEY_SELECTION);
+//            mLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+//            mLat = mLocation.getLatitude();
+//            mLon = mLocation.getLongitude();
+//            mWeatherSelection = savedInstanceState.getInt(KEY_SELECTION);
         }
+
 
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
@@ -285,11 +291,12 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
 
-                        drawHumidity();
-                        //Draw toast to say weather type being displayed
-                        Toast toast = Toast.makeText(getApplicationContext(), "Humidity", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
-                        toast.show();
+                        readData();
+//                        drawHumidity();
+//                        //Draw toast to say weather type being displayed
+//                        Toast toast = Toast.makeText(getApplicationContext(), "Humidity", Toast.LENGTH_SHORT);
+//                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
+//                        toast.show();
                     }
                 }
         );
@@ -347,10 +354,30 @@ public class MapsActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if(mMap != null){
-            outState.putParcelable(KEY_LOCATION, mLocation);
-            outState.putInt(KEY_SELECTION, mWeatherSelection);
-            super.onSaveInstanceState(outState);
+//            outState.putParcelable(KEY_LOCATION, mLocation);
+//            outState.putInt(KEY_SELECTION, mWeatherSelection);
+//            super.onSaveInstanceState(outState);
         }
+    }
+
+    /**
+     * Saves the data when application paused
+     */
+    @Override
+    public void onPause(){
+        super.onPause();
+        if(mWeather != null){
+            saveData();
+        }
+    }
+
+    /**
+     * Reads in saved data on resume
+     */
+    @Override
+    public void onResume(){
+        super.onResume();
+            readData();
     }
 
     /**
@@ -439,8 +466,6 @@ public class MapsActivity extends AppCompatActivity
             //Get weather of location
             getWeather();
 
-        } else {
-            Log.i(TAG, "location is null");
         }
 
         //Click listener to update location based on clicking on map
@@ -1059,5 +1084,32 @@ public class MapsActivity extends AppCompatActivity
         } else if (mWeatherSelection == 4) {
             drawWind();
         }
+    }
+
+    //Method for saving cache for onPause()
+    public void saveData() {
+        try {
+            FileOutputStream outputStream = getApplicationContext().openFileOutput("data", Context.MODE_PRIVATE);
+            ObjectOutputStream objectOutput = new ObjectOutputStream(outputStream);
+            objectOutput.writeObject(mWeather);
+            objectOutput.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.i(TAG, "Saved!");
+    }
+
+    //Method for reading cache for onResume()
+    public void readData() {
+        try {
+            FileInputStream inputStream = getApplicationContext().openFileInput("data");
+            ObjectInputStream objectInput = new ObjectInputStream(inputStream);
+            mWeather = (Weather)objectInput.readObject();
+            objectInput.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mDescriptionText.setText(mWeather.getDescription());
+        Log.i(TAG, "Loaded!");
     }
 }
