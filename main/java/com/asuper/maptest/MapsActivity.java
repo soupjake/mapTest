@@ -285,15 +285,11 @@ public class MapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(View v) {
 
-                        //testing boundaries
-                        String url = "http://nominatim.openstreetmap.org/search?q=Cardiff&format=json&polygon_geojson=1&limit=2";
-                        new BoundaryTask().execute(url);
-
-//                        drawHumidity();
-//                        //Draw toast to say weather type being displayed
-//                        Toast toast = Toast.makeText(getApplicationContext(), "Humidity", Toast.LENGTH_SHORT);
-//                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
-//                        toast.show();
+                        drawHumidity();
+                        //Draw toast to say weather type being displayed
+                        Toast toast = Toast.makeText(getApplicationContext(), "Humidity", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
+                        toast.show();
                     }
                 }
         );
@@ -746,70 +742,6 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    //Test method to get city boundaries
-    private class BoundaryTask extends AsyncTask<String, Void, Vector<LatLng>> {
-
-        @Override
-        protected Vector<LatLng> doInBackground(String... strings) {
-
-            //Test vector
-            Vector<LatLng> boundaryVec = new Vector<>();
-
-            try {
-                URL url = new URL(strings[0]);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-                InputStream stream = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream));
-                StringBuilder builder = new StringBuilder();
-
-                String inputString;
-                while ((inputString = bufferedReader.readLine()) != null) {
-                    builder.append(inputString);
-                }
-
-                //Object to hold JSON information
-                JSONArray JSONArray = new JSONArray(builder.toString());
-                JSONObject JSONObj = JSONArray.getJSONObject(1);
-
-                JSONObject geoObj = JSONObj.getJSONObject("geojson");
-                String type = geoObj.getString("type");
-                Log.i(TAG, type);
-                JSONArray coordinatesArray = geoObj.getJSONArray("coordinates");
-                JSONArray polyArray1 = coordinatesArray.getJSONArray(0);
-                JSONArray polyArray2 = polyArray1.getJSONArray(0);
-                for(int i = 0; i < polyArray2.length(); i++){
-                    JSONArray testArray = polyArray2.getJSONArray(i);
-                    mBoundaryVec.add(new LatLng(Double.parseDouble(testArray.get(1).toString()),Double.parseDouble(testArray.get(0).toString())));
-                }
-
-
-                urlConnection.disconnect();
-
-
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
-
-            return boundaryVec;
-        }
-
-        @Override
-        protected void onPostExecute(Vector<LatLng> boundaryVec) {
-            super.onPostExecute(boundaryVec);
-
-            mMap.clear();
-            PolygonOptions boundaryOptions = new PolygonOptions()
-                    .strokeColor(Color.RED)
-                    .fillColor(Color.BLUE);
-            for(int i = 0; i < mBoundaryVec.size(); i++){
-                boundaryOptions.add(mBoundaryVec.get(i));
-            }
-            Polygon boundary = mMap.addPolygon(boundaryOptions);
-
-        }
-    }
-
     //Method to getting weather
     public void getWeather() {
 
@@ -1052,10 +984,10 @@ public class MapsActivity extends AppCompatActivity
 
         //Draw precipitation circle onto map
         Circle circle = mMap.addCircle(new CircleOptions()
-                        .center(new LatLng(mLat, mLon))
-                        .radius(2000) //in metres
-                        .strokeWidth(0)
-                        .fillColor(color)
+                .center(new LatLng(mLat, mLon))
+                .radius(2000) //in metres
+                .strokeWidth(0)
+                .fillColor(color)
         );
 
         //Set weather FAB images
