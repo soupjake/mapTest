@@ -81,4 +81,5 @@ public class Format {
         animation.setDuration(500);
         return animation;
     }
+
 }

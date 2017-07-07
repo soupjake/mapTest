@@ -3,6 +3,8 @@ package com.asuper.maptest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -54,6 +56,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 public class MapsActivity extends AppCompatActivity
@@ -96,6 +100,7 @@ public class MapsActivity extends AppCompatActivity
     protected Location mLocation;
     private double mLat;
     private double mLon;
+    private String mCountryCode;
 
     // Keys for storing activity state.
     private static final String KEY_LOCATION = "location";
@@ -286,7 +291,9 @@ public class MapsActivity extends AppCompatActivity
                     public void onClick(View v) {
 
                         //testing boundaries
-                        String url = "http://nominatim.openstreetmap.org/search?q=Cardiff&format=json&polygon_geojson=1&limit=2";
+                        String url = "http://nominatim.openstreetmap.org/search?q=" +
+                                mWeather.getStationName() + "+" + mWeather.getCountryCode() +
+                                "&format=json&polygon_geojson=1";
                         new BoundaryTask().execute(url);
 
 //                        drawHumidity();
@@ -496,6 +503,24 @@ public class MapsActivity extends AppCompatActivity
                     .getLastLocation(mGoogleApiClient);
             mLat = mLocation.getLatitude();
             mLon = mLocation.getLongitude();
+
+            //Get address from Location
+            try{
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                List<Address> addresses;
+                addresses = geocoder.getFromLocation(mLat, mLon, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+
+                mCountryCode = addresses.get(0).getCountryCode();
+                String city = addresses.get(0).getLocality();
+                String state = addresses.get(0).getAdminArea();
+                String country = addresses.get(0).getCountryName();
+                String postalCode = addresses.get(0).getPostalCode();
+                String knownName = addresses.get(0).getFeatureName();
+                Log.i(TAG, ", " + city + ", " + state + ", " + country + ", " + postalCode + ", " + knownName);
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+
         }
     }
 
@@ -634,6 +659,7 @@ public class MapsActivity extends AppCompatActivity
             //Set global weather object based on location
             mWeather = weather;
 
+            //Apply Autocomplete filter
             mCountryFilter = new AutocompleteFilter.Builder()
                     .setCountry(weather.getCountryCode())
                     .build();
@@ -755,6 +781,9 @@ public class MapsActivity extends AppCompatActivity
             //Test vector
             Vector<LatLng> boundaryVec = new Vector<>();
 
+            //Clear mBoundaryVec
+            mBoundaryVec.clear();
+
             try {
                 URL url = new URL(strings[0]);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -768,21 +797,39 @@ public class MapsActivity extends AppCompatActivity
                     builder.append(inputString);
                 }
 
+                //Variables for searching through arrays
+                boolean hasPolygon = false;
+                int arrayItem = 0;
+
                 //Object to hold JSON information
                 JSONArray JSONArray = new JSONArray(builder.toString());
-                JSONObject JSONObj = JSONArray.getJSONObject(1);
-
-                JSONObject geoObj = JSONObj.getJSONObject("geojson");
-                String type = geoObj.getString("type");
-                Log.i(TAG, type);
-                JSONArray coordinatesArray = geoObj.getJSONArray("coordinates");
-                JSONArray polyArray1 = coordinatesArray.getJSONArray(0);
-                JSONArray polyArray2 = polyArray1.getJSONArray(0);
-                for(int i = 0; i < polyArray2.length(); i++){
-                    JSONArray testArray = polyArray2.getJSONArray(i);
-                    mBoundaryVec.add(new LatLng(Double.parseDouble(testArray.get(1).toString()),Double.parseDouble(testArray.get(0).toString())));
+                while (!hasPolygon){
+                    try{
+                        JSONObject JSONObj = JSONArray.getJSONObject(arrayItem);
+                        JSONObject geoObj = JSONObj.getJSONObject("geojson");
+                        String type = geoObj.getString("type");
+                        JSONArray coordinatesArray = geoObj.getJSONArray("coordinates");
+                        JSONArray polyArray1 = coordinatesArray.getJSONArray(0);
+                        if (type.equals("MultiPolygon")){
+                            JSONArray polyArray2 = polyArray1.getJSONArray(0);
+                            for(int i = 0; i < polyArray2.length(); i++){
+                                JSONArray testArray = polyArray2.getJSONArray(i);
+                                mBoundaryVec.add(new LatLng(Double.parseDouble(testArray.get(1).toString()),Double.parseDouble(testArray.get(0).toString())));
+                                hasPolygon = true;
+                            }
+                        } else if (type.equals("Polygon")){
+                            for(int i = 0; i < polyArray1.length(); i++){
+                                JSONArray testArray = polyArray1.getJSONArray(i);
+                                mBoundaryVec.add(new LatLng(Double.parseDouble(testArray.get(1).toString()),Double.parseDouble(testArray.get(0).toString())));
+                                hasPolygon = true;
+                            }
+                        } else if (arrayItem == JSONArray.length()-1 && type.equals("Point")){
+                            hasPolygon = false;
+                        }
+                    } catch (JSONException e){
+                        arrayItem++;
+                    }
                 }
-
 
                 urlConnection.disconnect();
 
@@ -799,13 +846,24 @@ public class MapsActivity extends AppCompatActivity
             super.onPostExecute(boundaryVec);
 
             mMap.clear();
-            PolygonOptions boundaryOptions = new PolygonOptions()
-                    .strokeColor(Color.RED)
-                    .fillColor(Color.BLUE);
-            for(int i = 0; i < mBoundaryVec.size(); i++){
-                boundaryOptions.add(mBoundaryVec.get(i));
+            mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
+            if (mBoundaryVec != null){
+                PolygonOptions boundaryOptions = new PolygonOptions()
+                        .strokeColor(Color.argb(150,0,191,255))
+                        .fillColor(Color.argb(75,0,191,255));
+                for(int i = 0; i < mBoundaryVec.size(); i++){
+                    boundaryOptions.add(mBoundaryVec.get(i));
+                }
+                Polygon boundary = mMap.addPolygon(boundaryOptions);
+            } else {
+                Circle circle = mMap.addCircle(new CircleOptions()
+                        .center(new LatLng(mLat, mLon))
+                        .radius(2000) //in metres
+                        .strokeColor(Color.argb(150,0,191,255))
+                        .fillColor(Color.argb(75,0,191,255))
+                );
             }
-            Polygon boundary = mMap.addPolygon(boundaryOptions);
+
 
         }
     }
