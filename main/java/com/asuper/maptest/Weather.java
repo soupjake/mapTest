@@ -15,7 +15,6 @@ public class Weather implements Serializable {
     private String date;
 
     private int temp;
-    private int pressure;
     private int humidity;
     private int windSpeed;
     private int windDeg;
@@ -61,14 +60,6 @@ public class Weather implements Serializable {
 
     public void setDate(String date) {
         this.date = date;
-    }
-
-    public int getPressure() {
-        return pressure;
-    }
-
-    public void setPressure(int pressure) {
-        this.pressure = pressure;
     }
 
     public int getHumidity() {
