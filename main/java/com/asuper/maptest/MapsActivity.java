@@ -43,6 +43,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,11 +71,10 @@ public class MapsActivity extends AppCompatActivity
     private static final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
 
     //Weather object used for overlay
-    private Weather mWeather = new Weather();
+    private Weather mWeather;
 
     //Vector to store forecast information
-    private Vector<Weather> mWeatherVec = new Vector<>();
-    private Vector<LatLng> mBoundaryVec = new Vector<>();
+    private Vector<Weather> mWeatherVec;
 
     //String variable to set unit type
     private String mUnits = "metric";
@@ -120,6 +120,8 @@ public class MapsActivity extends AppCompatActivity
     private TextView mDescriptionText;
     private TextView mWeatherText;
     private int mWeatherSelection;
+    private String mStationName;
+    private String mCountryCode;
 
 
     //Forecast ard variables
@@ -127,23 +129,22 @@ public class MapsActivity extends AppCompatActivity
     private TextView mDateText;
     private Button mLeftButton;
     private Button mRightButton;
-    private int mForecastSelection = 0;
+    private int mForecastSelection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Retrieve data from SharedPreferences
-        try{
+        try {
             SharedPreferences sharedPref = MapsActivity.this.getPreferences(Context.MODE_PRIVATE);
-
             Gson gson = new Gson();
             String mLocationJSON = sharedPref.getString("mLocation", null);
             mLocation = gson.fromJson(mLocationJSON, Location.class);
-            String mWeatherJSON = sharedPref.getString("mWeather", null);
-            mWeather = gson.fromJson(mWeatherJSON, Weather.class);
-            //String mWeatherVecJSON = sharedPref.getString("mWeatherVec", null);
-            //mWeatherVec = gson.fromJson(mWeatherVecJSON, new TypeToken<Vector<Weather>>() {}.getType());
+            mLat = mLocation.getLatitude();
+            mLon = mLocation.getLongitude();
+            String mWeatherVecJSON = sharedPref.getString("mWeatherVec", null);
+            mWeatherVec = gson.fromJson(mWeatherVecJSON, new TypeToken<Vector<Weather>>() {}.getType());
 
             //Get UI preferences
             mWeatherSelection = sharedPref.getInt("mWeatherSelection", 0);
@@ -151,7 +152,13 @@ public class MapsActivity extends AppCompatActivity
             mUnits = sharedPref.getString("mUnits", "metric");
         } catch (Exception e){
             e.printStackTrace();
+            mWeather = new Weather();
+            mWeatherVec = new Vector<>();
         }
+
+
+
+
 
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
@@ -219,8 +226,6 @@ public class MapsActivity extends AppCompatActivity
         mWeatherConstraint.setEnabled(false);
         mDateText = (TextView) findViewById(R.id.mDateText);
         mLeftButton = (Button) findViewById(R.id.mLeftButton);
-        mLeftButton.setEnabled(false);
-        mLeftButton.setTextColor(Color.TRANSPARENT);
         mLeftButton.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -228,11 +233,7 @@ public class MapsActivity extends AppCompatActivity
                 if (mForecastSelection != 0){
                     --mForecastSelection;
                 }
-                try{
-                    selectForecast(mForecastSelection);
-                } catch (IndexOutOfBoundsException | JSONException e){
-                    e.printStackTrace();
-                }
+                selectForecast(mForecastSelection);
             }
         });
 
@@ -241,14 +242,10 @@ public class MapsActivity extends AppCompatActivity
 
             @Override
             public void onClick(View v) {
-                if (mForecastSelection != (mWeatherVec.size()-1)){
+                if (mForecastSelection != 40){
                     ++mForecastSelection;
                 }
-                try{
-                    selectForecast(mForecastSelection);
-                } catch (IndexOutOfBoundsException | JSONException e){
-                    e.printStackTrace();
-                }
+                selectForecast(mForecastSelection);
             }
         });
 
@@ -361,24 +358,24 @@ public class MapsActivity extends AppCompatActivity
     public void onPause(){
         super.onPause();
 
-        //Save current data in SharedPreferences
-        SharedPreferences mapPref = MapsActivity.this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = mapPref.edit();
+        if (mMap != null){
+            //Save current data in SharedPreferences
+            SharedPreferences mapPref = MapsActivity.this.getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = mapPref.edit();
 
-        //Use Gson to save objects
-        Gson gson = new Gson();
-        String mLocationJSON = gson.toJson(mLocation);
-        editor.putString("mLocation", mLocationJSON);
-        String mWeatherJSON = gson.toJson(mWeather);
-        editor.putString("mWeather", mWeatherJSON);
-//        String mWeatherVecJSON = gson.toJson(mWeatherVec);
-//        editor.putString("mWeather", mWeatherVecJSON);
+            //Use Gson to save objects
+            Gson gson = new Gson();
+            String mLocationJSON = gson.toJson(mLocation);
+            editor.putString("mLocation", mLocationJSON);
+            String mWeatherVecJSON = gson.toJson(mWeatherVec);
+            editor.putString("mWeatherVec", mWeatherVecJSON);
 
-        //Save UI preferences
-        editor.putInt("mWeatherSelection", mWeatherSelection);
-        editor.putInt("mForecastSelection", mForecastSelection);
-        editor.putString("mUnits", mUnits);
-        editor.apply();
+            //Save UI preferences
+            editor.putInt("mWeatherSelection", mWeatherSelection);
+            editor.putInt("mForecastSelection", mForecastSelection);
+            editor.putString("mUnits", mUnits);
+            editor.apply();
+        }
     }
 
 
@@ -454,7 +451,7 @@ public class MapsActivity extends AppCompatActivity
     public void onMapReady(GoogleMap map) {
         mMap = map;
 
-        if (mLocation == null){
+        if (mLat == 0){
 
             //Get device's Location
             getDeviceLocation();
@@ -468,16 +465,13 @@ public class MapsActivity extends AppCompatActivity
         updateLocationUI();
 
         //Use location to run Weather Task to get weather info
-        if (mWeather == null) {
+        if (mLat == 0) {
 
             //Get weather of location
             getWeather();
 
         } else {
-            mDateText.setText(Format.formatDate(mWeather.getDate()));
-            mStationNameText.setText(mWeather.getStationName());
-            mDescriptionText.setText(mWeather.getDescription());
-            drawWeather();
+            selectForecast(mForecastSelection);
         }
 
         //Click listener to update location based on clicking on map
@@ -662,19 +656,18 @@ public class MapsActivity extends AppCompatActivity
         protected void onPostExecute(Weather weather) {
             super.onPostExecute(weather);
 
-            mWeatherVec.add(weather);
 
             //Set global weather object based on location
-            mWeather = weather;
+            mWeatherVec.add(weather);
 
+            //Set AutocompleteFilter
             mCountryFilter = new AutocompleteFilter.Builder()
                     .setCountry(weather.getCountryCode())
                     .build();
 
-            //Set textViews with their corresponding text values
-            mDateText.setText(weather.getDate());
-            mStationNameText.setText(weather.getStationName());
-            mDescriptionText.setText(weather.getDescription());
+            //Set text variables
+            mStationName = weather.getStationName();
+            mCountryCode = weather.getCountryCode();
 
             //Draw weather
             drawWeather();
@@ -719,6 +712,11 @@ public class MapsActivity extends AppCompatActivity
                     weatherTemp.setCondition(weatherObj.getString("main"));
                     weatherTemp.setDescription(Format.stringCapitalise(weatherObj.getString("description")));
 
+                    //Set string variables
+                    weatherTemp.setStationName(mStationName);
+                    weatherTemp.setCountryCode(mCountryCode);
+
+
                     //JSON Object of main weather doubles
                     JSONObject main = listObj.getJSONObject("main");
                     weatherTemp.setTemp((int)Math.round(main.getDouble("temp")));
@@ -748,7 +746,7 @@ public class MapsActivity extends AppCompatActivity
                     }
 
                     //JSON Object of weather date for forecast
-                    String date = (String.valueOf(listObj.get("dt_txt")));
+                    String date = (Format.formatDate(String.valueOf(listObj.get("dt_txt"))));
                     weatherTemp.setDate(date);
 
                     //Add to forecastVec
@@ -769,12 +767,8 @@ public class MapsActivity extends AppCompatActivity
         protected void onPostExecute(Weather weather) {
             super.onPostExecute(weather);
 
-            //Reset forecast Selection CardView
-            mForecastSelection = 0;
-            mLeftButton.setEnabled(false);
-            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
-            mRightButton.setEnabled(true);
-            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_right, null));
+            selectForecast(mForecastSelection);
+
         }
 
     }
@@ -803,27 +797,33 @@ public class MapsActivity extends AppCompatActivity
     }
 
     //Method for getting forecast weather
-    public void selectForecast(int forecastItem) throws JSONException{
+    public void selectForecast(int forecastItem){
 
         //Set mWeather to corresponding item in weather vector
         mWeather = mWeatherVec.get(forecastItem);
 
         //Set date and weather description text
-        mDateText.setText(Format.formatDate(mWeather.getDate()));
+        mStationNameText.setText(mWeather.getStationName());
+        mDateText.setText(mWeather.getDate());
         mDescriptionText.setText(mWeather.getDescription());
+
+        //Set AutocompleteFilter
+        mCountryFilter = new AutocompleteFilter.Builder()
+                .setCountry(mWeather.getCountryCode())
+                .build();
 
         //Draw weather
         drawWeather();
 
         //Set forecast buttons to be disabled or enabled based on mWeatherSelection
-        if(mForecastSelection > 0){
-            mLeftButton.setEnabled(true);
-            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_left, null));
-        } else {
+        if(mForecastSelection == 0){
             mLeftButton.setEnabled(false);
             mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
+        } else {
+            mLeftButton.setEnabled(true);
+            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_left, null));
         }
-        if(mForecastSelection == (mWeatherVec.size()-1)){
+        if(mForecastSelection == (40)){
             mRightButton.setEnabled(false);
             mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
         } else {

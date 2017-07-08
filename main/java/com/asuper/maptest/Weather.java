@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by super on 09/06/2017.
  */
 
-public class Weather implements Serializable {
+public class Weather {
 
     private String stationName;
     private String countryCode;

@@ -26,36 +26,30 @@ public class Format {
     //Method for formatting date
     public static String formatDate(String date){
 
-        //First check if date is "present" so to skip it
-        if(date.equals("Present")){
-            return date;
+        //Get time, month and date substrings
+        String time = date.substring(11, 13);
+        String month = date.substring(5, 7);
+        String day = date.substring(8, 10);
+
+        //Change time to friendly format
+        int timeInt = Integer.parseInt(time);
+
+        if (timeInt == 0) {
+            timeInt += 12;
+            time = (timeInt + "am");
+        } else if (timeInt < 12) {
+            time = (timeInt + "am");
+        } else if (timeInt == 12) {
+            time = (timeInt + "pm");
         } else {
-
-            //Get time, month and date substrings
-            String time = date.substring(11, 13);
-            String month = date.substring(5, 7);
-            String day = date.substring(8, 10);
-
-            //Change time to friendly format
-            int timeInt = Integer.parseInt(time);
-
-            if (timeInt == 0) {
-                timeInt += 12;
-                time = (timeInt + "am");
-            } else if (timeInt < 12) {
-                time = (timeInt + "am");
-            } else if (timeInt == 12) {
-                time = (timeInt + "pm");
-            } else {
-                timeInt -= 12;
-                time = (timeInt + "pm");
-            }
-
-            //Combine for rearranged date UK format
-            String formattedDate = new String(time + " " + day + "/" + month);
-
-            return formattedDate;
+            timeInt -= 12;
+            time = (timeInt + "pm");
         }
+
+        //Combine for rearranged date UK format
+        String formattedDate = new String(time + " " + day + "/" + month);
+
+        return formattedDate;
     }
 
     //Method for rounding precipitation volumes to 3 decimal places
