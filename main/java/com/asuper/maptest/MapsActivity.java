@@ -109,6 +109,7 @@ public class MapsActivity extends AppCompatActivity
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private AutocompleteFilter mCountryFilter;
     private Button mLocationButton;
+    private Button mRefreshButton;
 
     //Weather button and card variables
     private FloatingActionButton mWeatherButton;
@@ -213,6 +214,22 @@ public class MapsActivity extends AppCompatActivity
 
                         //Get weather for GPS location
                         getWeather();
+                    }
+                }
+        );
+
+        mRefreshButton = (Button) findViewById(R.id.mRefreshButton);
+        mRefreshButton.setOnClickListener(
+                new FloatingActionButton.OnClickListener(){
+
+                    @Override
+                    public void onClick(View v) {
+
+                        //Refresh weather and mForecastSelection
+                        getWeather();
+                        mForecastSelection = 0;
+                        selectForecast(mForecastSelection);
+
                     }
                 }
         );

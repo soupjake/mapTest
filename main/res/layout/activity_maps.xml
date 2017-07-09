@@ -31,6 +31,14 @@
             android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <Button
+            android:id="@+id/mRefreshButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="right"
+            android:layout_marginRight="8dp"
+            android:background="@drawable/ic_refresh" />
+
+        <Button
             android:id="@+id/mLocationButton"
             android:layout_width="32dp"
             android:layout_height="32dp"
