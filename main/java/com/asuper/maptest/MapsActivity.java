@@ -113,8 +113,14 @@ public class MapsActivity extends AppCompatActivity
     private AutocompleteFilter mCountryFilter;
     private Button mLocationButton;
     private Button mRefreshButton;
+
+    //Navigation menu variables
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mToggle;
+    private MenuItem mPlace1;
+    private MenuItem mPlace2;
+    private MenuItem mPlace3;
+    private MenuItem mPlace4;
 
     //Weather button and card variables
     private FloatingActionButton mWeatherButton;
@@ -141,28 +147,7 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        try {
-            // Retrieve data from SharedPreferences
-            SharedPreferences sharedPref = MapsActivity.this.getPreferences(Context.MODE_PRIVATE);
 
-            //Get objects using Gson
-            Gson gson = new Gson();
-            String mLocationJSON = sharedPref.getString("mLocation", null);
-            mLocation = gson.fromJson(mLocationJSON, Location.class);
-            mLat = mLocation.getLatitude();
-            mLon = mLocation.getLongitude();
-            String mWeatherVecJSON = sharedPref.getString("mWeatherVec", null);
-            mWeatherVec = gson.fromJson(mWeatherVecJSON, new TypeToken<Vector<Weather>>() {}.getType());
-
-            //Get UI preferences
-            mWeatherSelection = sharedPref.getInt("mWeatherSelection", 0);
-            mForecastSelection = sharedPref.getInt("mForecastSelection", 0);
-            mUnits = sharedPref.getString("mUnits", "metric");
-        } catch (Exception e){
-            e.printStackTrace();
-            mWeather = new Weather();
-            mWeatherVec = new Vector<>();
-        }
 
 
         // Retrieve the content view that renders the map.
@@ -362,6 +347,10 @@ public class MapsActivity extends AppCompatActivity
 
         //Set up App bar navigation menu
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mDrawerLayout);
+        mPlace1 = (MenuItem) findViewById(R.id.mPlace1);
+        mPlace2 = (MenuItem) findViewById(R.id.mPlace2);
+        mPlace3 = (MenuItem) findViewById(R.id.mPlace3);
+        mPlace4 = (MenuItem) findViewById(R.id.mPlace4);
         mToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mToggle.setDrawerIndicatorEnabled(false);
@@ -380,6 +369,33 @@ public class MapsActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.mNavigationView);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Retrieve data from SharedPreferences
+        try {
+            SharedPreferences sharedPref = MapsActivity.this.getPreferences(Context.MODE_PRIVATE);
+
+            //Get objects using Gson
+            Gson gson = new Gson();
+            String mLocationJSON = sharedPref.getString("mLocation", null);
+            mLocation = gson.fromJson(mLocationJSON, Location.class);
+            mLat = mLocation.getLatitude();
+            mLon = mLocation.getLongitude();
+            String mWeatherVecJSON = sharedPref.getString("mWeatherVec", null);
+            mWeatherVec = gson.fromJson(mWeatherVecJSON, new TypeToken<Vector<Weather>>() {}.getType());
+
+            //Get UI preferences
+            mWeatherSelection = sharedPref.getInt("mWeatherSelection", 0);
+            mForecastSelection = sharedPref.getInt("mForecastSelection", 0);
+            mUnits = sharedPref.getString("mUnits", "metric");
+
+            //Get Place names
+            //mPlace1.setTitle("test");
+
+        } catch (Exception e){
+            e.printStackTrace();
+            mWeather = new Weather();
+            mWeatherVec = new Vector<>();
+        }
 
         // Build the Play services client for use by the Fused Location Provider and the Places API.
         // Use the addApi() method to request the Google Places API and the Fused Location Provider.
@@ -404,28 +420,38 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.mDrawerLayout);
-        drawer.closeDrawer(GravityCompat.START);
+        int id = item.getItemId();
+
+        if (id == R.id.mPlace1) {
+
+            //Log.i(TAG, mPlace1.getTitle().toString());
+            drawer.closeDrawer(GravityCompat.START);
+
+        } else if (id == R.id.mPlace2) {
+
+            //Log.i(TAG, mPlace2.getTitle().toString());
+            drawer.closeDrawer(GravityCompat.START);
+
+        } else if (id == R.id.mPlace3) {
+
+            //Log.i(TAG, mPlace3.getTitle().toString());
+            drawer.closeDrawer(GravityCompat.START);
+
+        } else if (id == R.id.mPlace4) {
+
+            //Log.i(TAG, mPlace4.getTitle().toString());
+            drawer.closeDrawer(GravityCompat.START);
+
+        } else if (id == R.id.mSettingsUnits) {
+
+        } else if (id == R.id.mSettingsFilter) {
+
+        }
         return true;
     }
 

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/places">
+        <menu android:id="@+id/mPlaceMenu">
+            <group android:checkableBehavior="none">
+                <item
+                    android:id="@+id/mPlace1"
+                    android:icon="@drawable/ic_place"
+                    android:title="Place1"/>
+                <item
+                    android:id="@+id/mPlace2"
+                    android:icon="@drawable/ic_place"
+                    android:title="Place2" />
+                <item
+                    android:id="@+id/mPlace3"
+                    android:icon="@drawable/ic_place"
+                    android:title="Place3" />
+                <item
+                    android:id="@+id/mPlace4"
+                    android:icon="@drawable/ic_place"
+                    android:title="Place4" />
+            </group>
+        </menu>
+    </item>
+
+
+    <item android:title="@string/settings">
+        <menu android:id="@+id/mSettingsMenu" >
+            <group android:checkableBehavior="none">
+                <item
+                    android:id="@+id/mSettingsUnits"
+                    android:icon="@drawable/ic_weather"
+                    android:title="@string/units" />
+                <item
+                    android:id="@+id/mSettingsFilter"
+                    android:icon="@drawable/ic_radio_button_checked"
+                    android:title="@string/filter_search" />
+            </group>
+        </menu>
+
+    </item>
+
+</menu>
