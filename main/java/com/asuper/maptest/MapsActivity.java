@@ -11,13 +11,19 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -59,7 +65,8 @@ import java.net.URL;
 import java.util.Vector;
 
 public class MapsActivity extends AppCompatActivity
-        implements OnMapReadyCallback,
+        implements NavigationView.OnNavigationItemSelectedListener,
+        OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
@@ -98,10 +105,6 @@ public class MapsActivity extends AppCompatActivity
     private double mLat;
     private double mLon;
 
-    // Keys for storing activity state.
-    private static final String KEY_LOCATION = "location";
-    private static final String KEY_SELECTION = "mWeatherSelection";
-
     //AppBar variables
     private Toolbar mToolbar;
     private TextView mStationNameText;
@@ -110,6 +113,8 @@ public class MapsActivity extends AppCompatActivity
     private AutocompleteFilter mCountryFilter;
     private Button mLocationButton;
     private Button mRefreshButton;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mToggle;
 
     //Weather button and card variables
     private FloatingActionButton mWeatherButton;
@@ -136,9 +141,11 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Retrieve data from SharedPreferences
         try {
+            // Retrieve data from SharedPreferences
             SharedPreferences sharedPref = MapsActivity.this.getPreferences(Context.MODE_PRIVATE);
+
+            //Get objects using Gson
             Gson gson = new Gson();
             String mLocationJSON = sharedPref.getString("mLocation", null);
             mLocation = gson.fromJson(mLocationJSON, Location.class);
@@ -158,30 +165,17 @@ public class MapsActivity extends AppCompatActivity
         }
 
 
-
-
-
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
-
-        // Build the Play services client for use by the Fused Location Provider and the Places API.
-        // Use the addApi() method to request the Google Places API and the Fused Location Provider.
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */,
-                        this /* OnConnectionFailedListener */)
-                .addConnectionCallbacks(this)
-                .addApi(LocationServices.API)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .build();
-        mGoogleApiClient.connect();
 
         //Set up AppBar
         mToolbar = (Toolbar) findViewById(R.id.mToolbar);
         setSupportActionBar(mToolbar);
 
+        //Set App bar TextView to Station name
         mStationNameText = (TextView) findViewById(R.id.mStationNameText);
 
+        //Set up App bar buttons
         mSearchButton = (Button) findViewById(R.id.mSearchButton);
         mSearchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -366,6 +360,73 @@ public class MapsActivity extends AppCompatActivity
                 }
         );
 
+        //Set up App bar navigation menu
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.mDrawerLayout);
+        mToggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mToggle.setDrawerIndicatorEnabled(false);
+        mToggle.setHomeAsUpIndicator(R.drawable.ic_navigation);
+        mToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
+        mToggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.mNavigationView);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Build the Play services client for use by the Fused Location Provider and the Places API.
+        // Use the addApi() method to request the Google Places API and the Fused Location Provider.
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */,
+                        this /* OnConnectionFailedListener */)
+                .addConnectionCallbacks(this)
+                .addApi(LocationServices.API)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.mDrawerLayout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.mDrawerLayout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     /**

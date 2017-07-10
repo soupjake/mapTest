@@ -3,5 +3,7 @@
     <string name="title_activity_maps"></string>
     <string name="default_info_title">MapTest</string>
     <string name="default_info_snippet">Info Snippet</string>
-    <string name="pick_place">Pick Place</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
 </resources>
