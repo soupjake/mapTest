@@ -425,35 +425,18 @@ public class MapsActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.mDrawerLayout);
-        int id = item.getItemId();
 
-//        if (id == R.id.mPlace1) {
-//
-//            try{
-//                Log.i(TAG, item.getTitle().toString());
-//            } catch (Exception e){
-//                Log.i(TAG, "nope");
-//            }
-//
-//            drawer.closeDrawer(GravityCompat.START);
-//
-//        } else if (id == R.id.mPlace2) {
-//
-//            drawer.closeDrawer(GravityCompat.START);
-//
-//        } else if (id == R.id.mPlace3) {
-//
-//            drawer.closeDrawer(GravityCompat.START);
-//
-//        } else if (id == R.id.mPlace4) {
-//
-//            drawer.closeDrawer(GravityCompat.START);
-//
-//        } else if (id == R.id.mSettingsUnits) {
-//
-//        } else if (id == R.id.mSettingsFilter) {
-//
-//        }
+        //Change weather based on Nav item place selected
+        if(item.getGroupId() == 0){
+            mLat = mStationList.get(item.getItemId()).getStationLat();
+            mLon = mStationList.get(item.getItemId()).getStationLon();
+            updateLocationUI();
+            getWeather();
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            Log.i(TAG, "Settings option");
+        }
+
         return true;
     }
 
@@ -661,10 +644,9 @@ public class MapsActivity extends AppCompatActivity
         // Set the map's camera position to the location of the device.
         if (mCameraPosition != null) {
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
-        } else if (mLocation != null) {
+        } else if (mLat != 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(mLocation.getLatitude(),
-                            mLocation.getLongitude()), DEFAULT_ZOOM));
+                    new LatLng(mLat, mLon), DEFAULT_ZOOM));
         } else {
             Log.d(TAG, "Current location is null. Using defaults.");
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
@@ -1236,19 +1218,19 @@ public class MapsActivity extends AppCompatActivity
         Menu menu = mNavigationView.getMenu();
         menu.clear();
         if(mStationList.size() != 0){
-            int j = 0;
+            int order = 0;
             SubMenu placeSubMenu = menu.addSubMenu("Places");
-            for(int i = mStationList.size()-1; i >= 0; i--){
-                placeSubMenu.add(mStationList.get(i).getStationName());
-                placeSubMenu.getItem(j).setIcon(R.drawable.ic_place);
-                j++;
+            for(int listItem = mStationList.size()-1; listItem >= 0; listItem--){
+                placeSubMenu.add(0, listItem, order, mStationList.get(listItem).getStationName());
+                placeSubMenu.getItem(order).setIcon(R.drawable.ic_place);
+                order++;
             }
         }
 
         SubMenu settingsSubMenu = menu.addSubMenu("Settings");
-        settingsSubMenu.add("Units");
+        settingsSubMenu.add(1, 0, 0, "Units");
         settingsSubMenu.getItem(0).setIcon(R.drawable.ic_settings);
-        settingsSubMenu.add("Filter Search");
+        settingsSubMenu.add(1, 0, 0, "Filter Search");
         settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_checked);
     }
 }

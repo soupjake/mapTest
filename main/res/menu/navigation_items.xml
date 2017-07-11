@@ -1,35 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item android:title="@string/places">
-            <menu>
-                <item
-                    android:id="@+id/mPlace1"
-                    android:title="" />
-                <item
-                    android:id="@+id/mPlace2"
-                    android:title="" />
-                <item
-                    android:id="@+id/mPlace3"
-                    android:title="" />
-                <item
-                    android:id="@+id/mPlace4"
-                    android:title="" />
-            </menu>
-    </item>
-
-    <item android:title="@string/settings">
-        <menu android:id="@+id/mSettingsMenu" >
-                <item
-                    android:id="@+id/mSettingsUnits"
-                    android:icon="@drawable/ic_weather"
-                    android:title="@string/units" />
-                <item
-                    android:id="@+id/mSettingsFilter"
-                    android:icon="@drawable/ic_radio_button_checked"
-                    android:title="@string/filter_search" />
-        </menu>
-
-    </item>
-
 </menu>
