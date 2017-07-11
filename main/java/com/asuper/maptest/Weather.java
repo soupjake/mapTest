@@ -1,7 +1,5 @@
 package com.asuper.maptest;
 
-import java.io.Serializable;
-
 /**
  * Created by super on 09/06/2017.
  */

@@ -2,32 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:title="@string/places">
-        <menu android:id="@+id/mPlaceMenu">
-            <group android:checkableBehavior="none">
+            <menu>
                 <item
                     android:id="@+id/mPlace1"
-                    android:icon="@drawable/ic_place"
-                    android:title="Place1"/>
+                    android:title="" />
                 <item
                     android:id="@+id/mPlace2"
-                    android:icon="@drawable/ic_place"
-                    android:title="Place2" />
+                    android:title="" />
                 <item
                     android:id="@+id/mPlace3"
-                    android:icon="@drawable/ic_place"
-                    android:title="Place3" />
+                    android:title="" />
                 <item
                     android:id="@+id/mPlace4"
-                    android:icon="@drawable/ic_place"
-                    android:title="Place4" />
-            </group>
-        </menu>
+                    android:title="" />
+            </menu>
     </item>
-
 
     <item android:title="@string/settings">
         <menu android:id="@+id/mSettingsMenu" >
-            <group android:checkableBehavior="none">
                 <item
                     android:id="@+id/mSettingsUnits"
                     android:icon="@drawable/ic_weather"
@@ -36,7 +28,6 @@
                     android:id="@+id/mSettingsFilter"
                     android:icon="@drawable/ic_radio_button_checked"
                     android:title="@string/filter_search" />
-            </group>
         </menu>
 
     </item>

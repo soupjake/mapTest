@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -62,6 +63,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Vector;
 
 public class MapsActivity extends AppCompatActivity
@@ -82,6 +85,9 @@ public class MapsActivity extends AppCompatActivity
 
     //Vector to store forecast information
     private Vector<Weather> mWeatherVec;
+
+    //LinkedList to implement FIFO queue for Station locations
+    private LinkedList<Station> mStationList = new LinkedList<>();
 
     //String variable to set unit type
     private String mUnits = "metric";
@@ -116,11 +122,8 @@ public class MapsActivity extends AppCompatActivity
 
     //Navigation menu variables
     private DrawerLayout mDrawerLayout;
+    private NavigationView mNavigationView;
     private ActionBarDrawerToggle mToggle;
-    private MenuItem mPlace1;
-    private MenuItem mPlace2;
-    private MenuItem mPlace3;
-    private MenuItem mPlace4;
 
     //Weather button and card variables
     private FloatingActionButton mWeatherButton;
@@ -336,21 +339,21 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(View v) {
-                        drawWind();
-                        //Draw toast to say weather type being displayed
-                        Toast toast = Toast.makeText(getApplicationContext(), "Wind", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
-                        toast.show();
+
+                        updateNavigationMenu();
+
+//                        drawWind();
+//                        //Draw toast to say weather type being displayed
+//                        Toast toast = Toast.makeText(getApplicationContext(), "Wind", Toast.LENGTH_SHORT);
+//                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
+//                        toast.show();
                     }
                 }
         );
 
         //Set up App bar navigation menu
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mDrawerLayout);
-        mPlace1 = (MenuItem) findViewById(R.id.mPlace1);
-        mPlace2 = (MenuItem) findViewById(R.id.mPlace2);
-        mPlace3 = (MenuItem) findViewById(R.id.mPlace3);
-        mPlace4 = (MenuItem) findViewById(R.id.mPlace4);
+        mNavigationView = (NavigationView) findViewById(R.id.mNavigationView);
         mToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mToggle.setDrawerIndicatorEnabled(false);
@@ -366,9 +369,7 @@ public class MapsActivity extends AppCompatActivity
             }
         });
         mToggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.mNavigationView);
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
         // Retrieve data from SharedPreferences
         try {
@@ -382,14 +383,13 @@ public class MapsActivity extends AppCompatActivity
             mLon = mLocation.getLongitude();
             String mWeatherVecJSON = sharedPref.getString("mWeatherVec", null);
             mWeatherVec = gson.fromJson(mWeatherVecJSON, new TypeToken<Vector<Weather>>() {}.getType());
+            String mStationListJSON = sharedPref.getString("mStationList", null);
+            mStationList = gson.fromJson(mStationListJSON, new TypeToken<LinkedList<Station>>() {}.getType());
 
             //Get UI preferences
             mWeatherSelection = sharedPref.getInt("mWeatherSelection", 0);
             mForecastSelection = sharedPref.getInt("mForecastSelection", 0);
             mUnits = sharedPref.getString("mUnits", "metric");
-
-            //Get Place names
-            //mPlace1.setTitle("test");
 
         } catch (Exception e){
             e.printStackTrace();
@@ -427,31 +427,33 @@ public class MapsActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.mDrawerLayout);
         int id = item.getItemId();
 
-        if (id == R.id.mPlace1) {
-
-            //Log.i(TAG, mPlace1.getTitle().toString());
-            drawer.closeDrawer(GravityCompat.START);
-
-        } else if (id == R.id.mPlace2) {
-
-            //Log.i(TAG, mPlace2.getTitle().toString());
-            drawer.closeDrawer(GravityCompat.START);
-
-        } else if (id == R.id.mPlace3) {
-
-            //Log.i(TAG, mPlace3.getTitle().toString());
-            drawer.closeDrawer(GravityCompat.START);
-
-        } else if (id == R.id.mPlace4) {
-
-            //Log.i(TAG, mPlace4.getTitle().toString());
-            drawer.closeDrawer(GravityCompat.START);
-
-        } else if (id == R.id.mSettingsUnits) {
-
-        } else if (id == R.id.mSettingsFilter) {
-
-        }
+//        if (id == R.id.mPlace1) {
+//
+//            try{
+//                Log.i(TAG, item.getTitle().toString());
+//            } catch (Exception e){
+//                Log.i(TAG, "nope");
+//            }
+//
+//            drawer.closeDrawer(GravityCompat.START);
+//
+//        } else if (id == R.id.mPlace2) {
+//
+//            drawer.closeDrawer(GravityCompat.START);
+//
+//        } else if (id == R.id.mPlace3) {
+//
+//            drawer.closeDrawer(GravityCompat.START);
+//
+//        } else if (id == R.id.mPlace4) {
+//
+//            drawer.closeDrawer(GravityCompat.START);
+//
+//        } else if (id == R.id.mSettingsUnits) {
+//
+//        } else if (id == R.id.mSettingsFilter) {
+//
+//        }
         return true;
     }
 
@@ -473,6 +475,8 @@ public class MapsActivity extends AppCompatActivity
             editor.putString("mLocation", mLocationJSON);
             String mWeatherVecJSON = gson.toJson(mWeatherVec);
             editor.putString("mWeatherVec", mWeatherVecJSON);
+            String mStationListJSON = gson.toJson(mStationList);
+            editor.putString("mStationList", mStationListJSON);
 
             //Save UI preferences
             editor.putInt("mWeatherSelection", mWeatherSelection);
@@ -556,26 +560,17 @@ public class MapsActivity extends AppCompatActivity
         mMap = map;
 
         if (mLat == 0){
-
             //Get device's Location
             getDeviceLocation();
+            updateLocationUI();
+            getWeather();
 
         } else {
             mLat = mLocation.getLatitude();
             mLon = mLocation.getLongitude();
-        }
-
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-
-        //Use location to run Weather Task to get weather info
-        if (mLat == 0) {
-
-            //Get weather of location
-            getWeather();
-
-        } else {
+            updateLocationUI();
             selectForecast(mForecastSelection);
+            updateNavigationMenu();
         }
 
         //Click listener to update location based on clicking on map
@@ -597,6 +592,7 @@ public class MapsActivity extends AppCompatActivity
                 drawWeather();
             }
         });
+
     }
 
     /**
@@ -708,6 +704,7 @@ public class MapsActivity extends AppCompatActivity
                 //Set nearest weather station's name
                 weather.setStationName(weatherJSON.getString("name"));
 
+
                 //Set date as "present"
                 weather.setDate("Present");
 
@@ -760,23 +757,55 @@ public class MapsActivity extends AppCompatActivity
         protected void onPostExecute(Weather weather) {
             super.onPostExecute(weather);
 
+            //Check if default "Earth" isn't name
+            if(!weather.getStationName().equals("Earth")){
+                //Set global weather object based on location
+                mWeatherVec.add(weather);
 
-            //Set global weather object based on location
-            mWeatherVec.add(weather);
+                //Create Station object
+                Station station = new Station();
+                station.setStationName(weather.getStationName());
+                station.setStationLat(mLat);
+                station.setStationLon(mLon);
 
-            //Set AutocompleteFilter
-            mCountryFilter = new AutocompleteFilter.Builder()
-                    .setCountry(weather.getCountryCode())
-                    .build();
+                //Check for duplicates
+                int duplicate = 0;
 
-            //Set text variables
-            mStationName = weather.getStationName();
-            mCountryCode = weather.getCountryCode();
+                for(int i = 0; i < mStationList.size(); i++) {
+                    if (mStationList.get(i).getStationName().equals(weather.getStationName())) {
+                        mStationList.remove(i);
+                        mStationList.add(station);
+                        duplicate = 1;
+                    }
+                }
+                //Create new Station object for mStationList if no duplicates
+                if(duplicate != 1){
+                    //Set Station details
+                    if (mStationList.size() < 4){
+                        mStationList.add(station);
+                    } else {
+                        mStationList.removeFirst();
+                        mStationList.add(station);
+                    }
+                }
 
-            //Draw weather
-            drawWeather();
+                //Update Navigation Menu
+                updateNavigationMenu();
 
-            getForecast();
+                //Set AutocompleteFilter
+                mCountryFilter = new AutocompleteFilter.Builder()
+                        .setCountry(weather.getCountryCode())
+                        .build();
+
+                //Set text variables
+                mStationName = weather.getStationName();
+                mCountryCode = weather.getCountryCode();
+
+                //Draw weather
+                drawWeather();
+
+                getForecast();
+            }
         }
     }
     private class ForecastTask extends AsyncTask<String, Void, Weather> {
@@ -1200,5 +1229,26 @@ public class MapsActivity extends AppCompatActivity
         } else if (mWeatherSelection == 4) {
             drawWind();
         }
+    }
+
+    //Method for updating Navigation menu
+    public void updateNavigationMenu(){
+        Menu menu = mNavigationView.getMenu();
+        menu.clear();
+        if(mStationList.size() != 0){
+            int j = 0;
+            SubMenu placeSubMenu = menu.addSubMenu("Places");
+            for(int i = mStationList.size()-1; i >= 0; i--){
+                placeSubMenu.add(mStationList.get(i).getStationName());
+                placeSubMenu.getItem(j).setIcon(R.drawable.ic_place);
+                j++;
+            }
+        }
+
+        SubMenu settingsSubMenu = menu.addSubMenu("Settings");
+        settingsSubMenu.add("Units");
+        settingsSubMenu.getItem(0).setIcon(R.drawable.ic_settings);
+        settingsSubMenu.add("Filter Search");
+        settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_checked);
     }
 }
