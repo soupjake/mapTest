@@ -4,6 +4,9 @@ import android.content.res.Resources;
 import android.util.TypedValue;
 import android.view.animation.AlphaAnimation;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Created by super on 27/06/2017.
  * Here are the methods that I use for formatting data
@@ -75,5 +78,7 @@ public class Format {
         animation.setDuration(500);
         return animation;
     }
+
+
 
 }

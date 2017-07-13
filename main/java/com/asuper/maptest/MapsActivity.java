@@ -77,7 +77,7 @@ public class MapsActivity extends AppCompatActivity
     private CameraPosition mCameraPosition;
 
     //OpenWeatherMap API key
-    private static final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
+    private final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
 
     //Weather object used for overlay
     private Weather mWeather;
@@ -86,7 +86,7 @@ public class MapsActivity extends AppCompatActivity
     private Vector<Weather> mWeatherVec;
 
     //LinkedList to implement FIFO queue for Station locations
-    private LinkedList<Station> mStationList = new LinkedList<>();
+    private LinkedList<Station> mStationList;
 
     //String variable to set unit type
     private String mUnits = "metric";
@@ -123,6 +123,7 @@ public class MapsActivity extends AppCompatActivity
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     private ActionBarDrawerToggle mToggle;
+    private boolean mFilterSearch;
 
     //Weather button and card variables
     private FloatingActionButton mWeatherButton;
@@ -149,9 +150,6 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-
-
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
 
@@ -168,11 +166,18 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 try {
-                    Intent intent =
-                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                                    .setFilter(mCountryFilter)
-                                    .build(MapsActivity.this);
-                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                    if(mFilterSearch){
+                        Intent intent =
+                                new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                                        .setFilter(mCountryFilter)
+                                        .build(MapsActivity.this);
+                        startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                    } else{
+                        Intent intent =
+                                new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                                        .build(MapsActivity.this);
+                        startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                    }
                 } catch (GooglePlayServicesRepairableException e) {
                     e.printStackTrace();
                 } catch (GooglePlayServicesNotAvailableException e) {
@@ -338,6 +343,7 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(View v) {
+
                         drawWind();
                         //Draw toast to say weather type being displayed
                         Toast toast = Toast.makeText(getApplicationContext(), "Wind", Toast.LENGTH_SHORT);
@@ -385,12 +391,16 @@ public class MapsActivity extends AppCompatActivity
             //Get UI preferences
             mWeatherSelection = sharedPref.getInt("mWeatherSelection", 0);
             mForecastSelection = sharedPref.getInt("mForecastSelection", 0);
+            mFilterSearch = sharedPref.getBoolean("mFilterSearch", true);
             mUnits = sharedPref.getString("mUnits", "metric");
 
         } catch (Exception e){
             e.printStackTrace();
+            //Initialise objects default
             mWeather = new Weather();
             mWeatherVec = new Vector<>();
+            mStationList = new LinkedList<>();
+            mFilterSearch = true;
         }
 
         // Build the Play services client for use by the Fused Location Provider and the Places API.
@@ -429,8 +439,14 @@ public class MapsActivity extends AppCompatActivity
             updateLocationUI();
             getWeather();
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            Log.i(TAG, "Settings option");
+        } else if(item.getTitle().equals("Filter Search")){
+            if(mFilterSearch){
+                mFilterSearch = false;
+                item.setIcon(R.drawable.ic_radio_button_unchecked);
+            } else {
+                mFilterSearch = true;
+                item.setIcon(R.drawable.ic_radio_button_checked);
+            }
         }
 
         return true;
@@ -460,6 +476,7 @@ public class MapsActivity extends AppCompatActivity
             //Save UI preferences
             editor.putInt("mWeatherSelection", mWeatherSelection);
             editor.putInt("mForecastSelection", mForecastSelection);
+            editor.putBoolean("mFilterSearch", mFilterSearch);
             editor.putString("mUnits", mUnits);
             editor.apply();
         }
@@ -786,6 +803,21 @@ public class MapsActivity extends AppCompatActivity
             }
         }
     }
+
+    //Method to getting weather
+    public void getWeather() {
+
+        //Set weather text to say loading
+        mStationNameText.setText("Getting station...");
+        mDescriptionText.setText("Getting weather...");
+        mWeatherText.setText("");
+
+        //Get present weather
+        String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + mLat + "&lon=" + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
+        new WeatherTask().execute(url);
+
+    }
+
     private class ForecastTask extends AsyncTask<String, Void, Weather> {
 
         @Override
@@ -884,20 +916,6 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    //Method to getting weather
-    public void getWeather() {
-
-        //Set weather text to say loading
-        mStationNameText.setText("Getting station...");
-        mDescriptionText.setText("Getting weather...");
-        mWeatherText.setText("");
-
-        //Get present weather
-        String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + mLat + "&lon=" + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
-        new WeatherTask().execute(url);
-
-    }
-
     //Method to getting forecast
     public void getForecast() {
 
@@ -907,7 +925,9 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-    //Method for getting forecast weather
+
+
+        //Method for getting forecast weather
     public void selectForecast(int forecastItem){
 
         //Set mWeather to corresponding item in weather vector
@@ -1227,6 +1247,11 @@ public class MapsActivity extends AppCompatActivity
         settingsSubMenu.add(1, 0, 0, "Units");
         settingsSubMenu.getItem(0).setIcon(R.drawable.ic_settings);
         settingsSubMenu.add(1, 0, 0, "Filter Search");
-        settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_checked);
+        if(mFilterSearch){
+            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_checked);
+        } else{
+            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_unchecked);
+        }
     }
+
 }
