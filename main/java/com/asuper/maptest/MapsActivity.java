@@ -379,10 +379,10 @@ public class MapsActivity extends AppCompatActivity
 
             //Get objects using Gson
             Gson gson = new Gson();
-            String mLocationJSON = sharedPref.getString("mLocation", null);
-            mLocation = gson.fromJson(mLocationJSON, Location.class);
-            mLat = mLocation.getLatitude();
-            mLon = mLocation.getLongitude();
+            String mLatJSON = sharedPref.getString("mLat", null);
+            mLat = gson.fromJson(mLatJSON, double.class);
+            String mLonJSON = sharedPref.getString("mLon", null);
+            mLon = gson.fromJson(mLonJSON, double.class);
             String mWeatherVecJSON = sharedPref.getString("mWeatherVec", null);
             mWeatherVec = gson.fromJson(mWeatherVecJSON, new TypeToken<Vector<Weather>>() {}.getType());
             String mStationListJSON = sharedPref.getString("mStationList", null);
@@ -466,8 +466,10 @@ public class MapsActivity extends AppCompatActivity
 
             //Use Gson to save objects
             Gson gson = new Gson();
-            String mLocationJSON = gson.toJson(mLocation);
-            editor.putString("mLocation", mLocationJSON);
+            String mLatJSON = gson.toJson(mLat);
+            editor.putString("mLat", mLatJSON);
+            String mLonJSON = gson.toJson(mLon);
+            editor.putString("mLon", mLonJSON);
             String mWeatherVecJSON = gson.toJson(mWeatherVec);
             editor.putString("mWeatherVec", mWeatherVecJSON);
             String mStationListJSON = gson.toJson(mStationList);
@@ -562,8 +564,6 @@ public class MapsActivity extends AppCompatActivity
             getWeather();
 
         } else {
-            mLat = mLocation.getLatitude();
-            mLon = mLocation.getLongitude();
             updateLocationUI();
             selectForecast(mForecastSelection);
             updateNavigationMenu();
@@ -575,8 +575,6 @@ public class MapsActivity extends AppCompatActivity
             public void onMapClick(LatLng latLng) {
                 mLat = latLng.latitude;
                 mLon = latLng.longitude;
-                mLocation.setLatitude(mLat);
-                mLocation.setLongitude(mLon);
 
                 //update map's location to place location
                 updateLocationUI();
@@ -696,9 +694,8 @@ public class MapsActivity extends AppCompatActivity
                 //Object to hold JSON information
                 JSONObject weatherJSON = new JSONObject(builder.toString());
 
-                //Set nearest weather station's name
-                weather.setStationName(weatherJSON.getString("name"));
-
+                //Set nearest weather station's name and shorten if too long
+                weather.setStationName(Format.shortenName(weatherJSON.getString("name")));
 
                 //Set date as "present"
                 weather.setDate("Present");
@@ -794,6 +791,7 @@ public class MapsActivity extends AppCompatActivity
 
                 //Set text variables
                 mStationName = weather.getStationName();
+
                 mCountryCode = weather.getCountryCode();
 
                 //Draw weather
@@ -977,8 +975,6 @@ public class MapsActivity extends AppCompatActivity
                 LatLng placeLatLng = place.getLatLng();
                 mLat = placeLatLng.latitude;
                 mLon = placeLatLng.longitude;
-                mLocation.setLatitude(mLat);
-                mLocation.setLongitude(mLon);
 
                 //update map's location to place location
                 updateLocationUI();

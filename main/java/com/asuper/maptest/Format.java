@@ -26,6 +26,13 @@ public class Format {
         return str;
     }
 
+    public static String shortenName(String stationName) {
+        if(stationName.length() > 22){
+            stationName = stationName.substring(0, 22) + "...";
+        }
+        return stationName;
+    }
+
     //Method for formatting date
     public static String formatDate(String date){
 
