@@ -1,8 +1,12 @@
 package com.asuper.maptest;
 
+import android.accounts.Account;
+import android.content.AbstractThreadedSyncAdapter;
+import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SyncResult;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -33,6 +37,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
@@ -49,6 +54,7 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.security.ProviderInstaller;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -99,7 +105,7 @@ public class MapsActivity extends AppCompatActivity
 
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
-    private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private final LatLng mDefaultLocation = new LatLng(51.48, -3.21);
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
@@ -613,10 +619,16 @@ public class MapsActivity extends AppCompatActivity
          */
         if (mLocationPermissionGranted) {
             //First set location to variable for use
-            mLocation = LocationServices.FusedLocationApi
-                    .getLastLocation(mGoogleApiClient);
-            mLat = mLocation.getLatitude();
-            mLon = mLocation.getLongitude();
+            try{
+                mLocation = LocationServices.FusedLocationApi
+                        .getLastLocation(mGoogleApiClient);
+                mLat = mLocation.getLatitude();
+                mLon = mLocation.getLongitude();
+            } catch (Exception e){
+                mLat = mDefaultLocation.latitude;
+                mLon = mDefaultLocation.longitude;
+            }
+
         }
     }
 
