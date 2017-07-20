@@ -1,12 +1,8 @@
 package com.asuper.maptest;
 
-import android.accounts.Account;
-import android.content.AbstractThreadedSyncAdapter;
-import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SyncResult;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -23,6 +19,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -37,7 +34,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
@@ -54,7 +50,6 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.security.ProviderInstaller;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -121,7 +116,6 @@ public class MapsActivity extends AppCompatActivity
     private TextView mStationNameText;
     private Button mSearchButton;
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
-    private AutocompleteFilter mCountryFilter;
     private Button mLocationButton;
     private Button mRefreshButton;
 
@@ -154,6 +148,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         super.onCreate(savedInstanceState);
 
         // Retrieve the content view that renders the map.
@@ -175,7 +170,9 @@ public class MapsActivity extends AppCompatActivity
                     if(mFilterSearch){
                         Intent intent =
                                 new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                                        .setFilter(mCountryFilter)
+                                        .setFilter(new AutocompleteFilter.Builder()
+                                                .setCountry(mCountryCode)
+                                                .build())
                                         .build(MapsActivity.this);
                         startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
                     } else{
@@ -251,7 +248,7 @@ public class MapsActivity extends AppCompatActivity
 
             @Override
             public void onClick(View v) {
-                if (mForecastSelection != 40){
+                if (mForecastSelection != 39){
                     ++mForecastSelection;
                 }
                 selectForecast(mForecastSelection);
@@ -796,11 +793,6 @@ public class MapsActivity extends AppCompatActivity
                 //Update Navigation Menu
                 updateNavigationMenu();
 
-                //Set AutocompleteFilter
-                mCountryFilter = new AutocompleteFilter.Builder()
-                        .setCountry(weather.getCountryCode())
-                        .build();
-
                 //Set text variables
                 mStationName = weather.getStationName();
 
@@ -948,11 +940,6 @@ public class MapsActivity extends AppCompatActivity
         mDateText.setText(mWeather.getDate());
         mDescriptionText.setText(mWeather.getDescription());
 
-        //Set AutocompleteFilter
-        mCountryFilter = new AutocompleteFilter.Builder()
-                .setCountry(mWeather.getCountryCode())
-                .build();
-
         //Draw weather
         drawWeather();
 
@@ -964,7 +951,7 @@ public class MapsActivity extends AppCompatActivity
             mLeftButton.setEnabled(true);
             mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_left, null));
         }
-        if(mForecastSelection == (40)){
+        if(mForecastSelection == (39)){
             mRightButton.setEnabled(false);
             mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
         } else {
@@ -1211,7 +1198,7 @@ public class MapsActivity extends AppCompatActivity
         }
 
         //Set mWeatherText
-        mWeatherText.setText(mWeather.getWindDeg() + "m/s" + " " + windDirection);
+        mWeatherText.setText(mWeather.getWindSpeed() + "m/s" + " " + windDirection);
 
         //Set weather FAB images
         mTempButton.setImageResource(R.drawable.ic_thermometer);
@@ -1252,13 +1239,11 @@ public class MapsActivity extends AppCompatActivity
         }
 
         SubMenu settingsSubMenu = menu.addSubMenu("Settings");
-        settingsSubMenu.add(1, 0, 0, "Units");
-        settingsSubMenu.getItem(0).setIcon(R.drawable.ic_settings);
         settingsSubMenu.add(1, 0, 0, "Filter Search");
         if(mFilterSearch){
-            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_checked);
+            settingsSubMenu.getItem(0).setIcon(R.drawable.ic_radio_button_checked);
         } else{
-            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_unchecked);
+            settingsSubMenu.getItem(0).setIcon(R.drawable.ic_radio_button_unchecked);
         }
     }
 
