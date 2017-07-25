@@ -367,22 +367,6 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.mRefreshButton:
-                //Refresh weather and mForecastSelection
-                getWeather();
-                mForecastSelection = 0;
-                selectForecast(mForecastSelection);
-                return true;
-
-            case R.id.mLocationButton:
-                //Get location based on GPS and update map UI
-                getDeviceLocation();
-                updateLocationUI();
-
-                //Get weather for GPS location
-                getWeather();
-                return true;
-
 
             case R.id.mSearchButton:
                 //Launch Autocomplete Place search function
@@ -406,6 +390,22 @@ public class MapsActivity extends AppCompatActivity
                 } catch (GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
                 }
+                return true;
+
+            case R.id.mLocationButton:
+                //Get location based on GPS and update map UI
+                getDeviceLocation();
+                updateLocationUI();
+
+                //Get weather for GPS location
+                getWeather();
+                return true;
+
+            case R.id.mRefreshButton:
+                //Refresh weather and mForecastSelection
+                getWeather();
+                mForecastSelection = 0;
+                selectForecast(mForecastSelection);
                 return true;
 
             default:
