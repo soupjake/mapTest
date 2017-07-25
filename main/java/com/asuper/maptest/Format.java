@@ -26,13 +26,6 @@ public class Format {
         return str;
     }
 
-    public static String shortenName(String stationName) {
-        if(stationName.length() > 22){
-            stationName = stationName.substring(0, 22) + "...";
-        }
-        return stationName;
-    }
-
     //Method for formatting date
     public static String formatDate(String date){
 
@@ -65,7 +58,6 @@ public class Format {
     //Method for rounding precipitation volumes to 3 decimal places
     public static double roundVolume(double volume){
 
-        //Code from: https://stackoverflow.com/questions/2808535/round-a-double-to-2-decimal-places
         long factor = (long)Math.pow(10, 3);
         volume *= factor;
         long temp = Math.round(volume);

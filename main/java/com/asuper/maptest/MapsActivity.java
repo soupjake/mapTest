@@ -24,6 +24,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
@@ -114,10 +115,7 @@ public class MapsActivity extends AppCompatActivity
     //AppBar variables
     private Toolbar mToolbar;
     private TextView mStationNameText;
-    private Button mSearchButton;
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
-    private Button mLocationButton;
-    private Button mRefreshButton;
 
     //Navigation menu variables
     private DrawerLayout mDrawerLayout;
@@ -160,68 +158,6 @@ public class MapsActivity extends AppCompatActivity
 
         //Set App bar TextView to Station name
         mStationNameText = (TextView) findViewById(R.id.mStationNameText);
-
-        //Set up App bar buttons
-        mSearchButton = (Button) findViewById(R.id.mSearchButton);
-        mSearchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    if(mFilterSearch){
-                        Intent intent =
-                                new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                                        .setFilter(new AutocompleteFilter.Builder()
-                                                .setCountry(mCountryCode)
-                                                .build())
-                                        .build(MapsActivity.this);
-                        startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-                    } else{
-                        Intent intent =
-                                new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                                        .build(MapsActivity.this);
-                        startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-                    }
-                } catch (GooglePlayServicesRepairableException e) {
-                    e.printStackTrace();
-                } catch (GooglePlayServicesNotAvailableException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
-
-        mLocationButton = (Button) findViewById(R.id.mLocationButton);
-        mLocationButton.setOnClickListener(
-                new FloatingActionButton.OnClickListener(){
-
-                    @Override
-                    public void onClick(View v) {
-
-                        //Get location based on GPS and update map UI
-                        getDeviceLocation();
-                        updateLocationUI();
-
-                        //Get weather for GPS location
-                        getWeather();
-                    }
-                }
-        );
-
-        mRefreshButton = (Button) findViewById(R.id.mRefreshButton);
-        mRefreshButton.setOnClickListener(
-                new FloatingActionButton.OnClickListener(){
-
-                    @Override
-                    public void onClick(View v) {
-
-                        //Refresh weather and mForecastSelection
-                        getWeather();
-                        mForecastSelection = 0;
-                        selectForecast(mForecastSelection);
-
-                    }
-                }
-        );
 
         //Set weather TextViews
         mDescriptionText = (TextView) findViewById(R.id.mDescriptionText);
@@ -419,6 +355,68 @@ public class MapsActivity extends AppCompatActivity
         mGoogleApiClient.connect();
     }
 
+    //Create options menu for App bar buttons
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.appbar_items, menu);
+        return true;
+    }
+
+    //Apply click listeners to App bar buttons
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.mRefreshButton:
+                //Refresh weather and mForecastSelection
+                getWeather();
+                mForecastSelection = 0;
+                selectForecast(mForecastSelection);
+                return true;
+
+            case R.id.mLocationButton:
+                //Get location based on GPS and update map UI
+                getDeviceLocation();
+                updateLocationUI();
+
+                //Get weather for GPS location
+                getWeather();
+                return true;
+
+
+            case R.id.mSearchButton:
+                //Launch Autocomplete Place search function
+                try {
+                    if(mFilterSearch){
+                        Intent intent =
+                                new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                                        .setFilter(new AutocompleteFilter.Builder()
+                                                .setCountry(mCountryCode)
+                                                .build())
+                                        .build(MapsActivity.this);
+                        startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                    } else{
+                        Intent intent =
+                                new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                                        .build(MapsActivity.this);
+                        startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                    }
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    //Settings back button to close navigation drawer if opened
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.mDrawerLayout);
@@ -429,6 +427,7 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
+    //Setting click listeners for items within Navigation menu
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -704,7 +703,7 @@ public class MapsActivity extends AppCompatActivity
                 JSONObject weatherJSON = new JSONObject(builder.toString());
 
                 //Set nearest weather station's name and shorten if too long
-                weather.setStationName(Format.shortenName(weatherJSON.getString("name")));
+                weather.setStationName(weatherJSON.getString("name"));
 
                 //Set date as "present"
                 weather.setDate("Present");
