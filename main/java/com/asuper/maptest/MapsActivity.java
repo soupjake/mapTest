@@ -184,7 +184,7 @@ public class MapsActivity extends AppCompatActivity
 
             @Override
             public void onClick(View v) {
-                if (mForecastSelection != 39){
+                if (mForecastSelection != mWeatherVec.size()-1){
                     ++mForecastSelection;
                 }
                 selectForecast(mForecastSelection);
@@ -950,7 +950,7 @@ public class MapsActivity extends AppCompatActivity
             mLeftButton.setEnabled(true);
             mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_left, null));
         }
-        if(mForecastSelection == (39)){
+        if(mForecastSelection == mWeatherVec.size()-1){
             mRightButton.setEnabled(false);
             mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
         } else {
