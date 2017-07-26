@@ -331,7 +331,6 @@ public class MapsActivity extends AppCompatActivity
             mWeatherSelection = sharedPref.getInt("mWeatherSelection", 0);
             mForecastSelection = sharedPref.getInt("mForecastSelection", 0);
             mFilterSearch = sharedPref.getBoolean("mFilterSearch", true);
-            mUnits = sharedPref.getString("mUnits", "metric");
 
         } catch (Exception e){
             e.printStackTrace();
@@ -481,7 +480,6 @@ public class MapsActivity extends AppCompatActivity
             editor.putInt("mWeatherSelection", mWeatherSelection);
             editor.putInt("mForecastSelection", mForecastSelection);
             editor.putBoolean("mFilterSearch", mFilterSearch);
-            editor.putString("mUnits", mUnits);
             editor.apply();
         }
     }
@@ -584,8 +582,6 @@ public class MapsActivity extends AppCompatActivity
                 //Get weather for place
                 getWeather();
 
-                //Draw weather
-                drawWeather();
             }
         });
 
