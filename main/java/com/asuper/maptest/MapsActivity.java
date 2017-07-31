@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -93,8 +94,9 @@ public class MapsActivity extends AppCompatActivity
     //String variable to set unit type
     private String mUnits = "metric";
 
-    //String unicode for degree sign
+    //Unit variables
     private String mDegrees = "\u00b0";
+    private double mph = 2.23694;
 
     // The entry point to Google Play services, used by the Places API and Fused Location Provider.
     private GoogleApiClient mGoogleApiClient;
@@ -124,8 +126,7 @@ public class MapsActivity extends AppCompatActivity
     private boolean mFilterSearch;
 
     //Weather button and card variables
-    private FloatingActionButton mWeatherButton;
-    private FloatingActionButton mTempButton;
+    private FloatingActionButton mTemperatureButton;
     private FloatingActionButton mHumidityButton;
     private FloatingActionButton mCloudButton;
     private FloatingActionButton mPrecipitationButton;
@@ -138,7 +139,6 @@ public class MapsActivity extends AppCompatActivity
 
 
     //Forecast ard variables
-    private ConstraintLayout mWeatherConstraint;
     private TextView mDateText;
     private Button mLeftButton;
     private Button mRightButton;
@@ -164,8 +164,6 @@ public class MapsActivity extends AppCompatActivity
         mWeatherText = (TextView) findViewById(R.id.mWeatherText);
 
         //Set up forecast CardView
-        mWeatherConstraint = (ConstraintLayout) findViewById(R.id.mWeatherConstraint);
-        mWeatherConstraint.setEnabled(false);
         mDateText = (TextView) findViewById(R.id.mDateText);
         mLeftButton = (Button) findViewById(R.id.mLeftButton);
         mLeftButton.setOnClickListener(new View.OnClickListener(){
@@ -192,31 +190,8 @@ public class MapsActivity extends AppCompatActivity
         });
 
         //Set up weather Buttons
-        mWeatherButton = (FloatingActionButton) findViewById(R.id.mWeatherButton);
-        mWeatherButton.setOnClickListener(
-                new FloatingActionButton.OnClickListener(){
-
-                    @Override
-                    public void onClick(View v) {
-
-                        if(mWeatherConstraint.isEnabled()){
-                            mWeatherButton.setImageResource(R.drawable.ic_weather);
-                            mWeatherConstraint.setAnimation(Format.fadeAnimation(1, 0));
-                            mWeatherConstraint.setVisibility(View.GONE);
-                            mWeatherConstraint.setEnabled(false);
-                        } else {
-                            mWeatherButton.setImageResource(R.drawable.ic_weather_enabled);
-                            mWeatherConstraint.setAnimation(Format.fadeAnimation(0, 1));
-                            mWeatherConstraint.setVisibility(View.VISIBLE);
-                            mWeatherConstraint.setEnabled(true);
-                        }
-
-                    }
-                }
-        );
-
-        mTempButton = (FloatingActionButton) findViewById(R.id.mTempButton);
-        mTempButton.setOnClickListener(
+        mTemperatureButton = (FloatingActionButton) findViewById(R.id.mTemperatureButton);
+        mTemperatureButton.setOnClickListener(
                 new FloatingActionButton.OnClickListener(){
 
                     @Override
@@ -282,13 +257,13 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(View v) {
-
-                        drawWind();
                         //Draw toast to say weather type being displayed
-                        Toast toast = Toast.makeText(getApplicationContext(), "Wind", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplicationContext(),
+                                "Wind: " + mWeather.getWindSpeed() + "mph" + " " + Format.formatWind(mWeather.getWindDeg())
+                                , Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
                         toast.show();
-                }
+                    }
                 }
         );
 
@@ -725,7 +700,7 @@ public class MapsActivity extends AppCompatActivity
 
                 //Get wind speed and direction
                 JSONObject windObj = weatherJSON.getJSONObject("wind");
-                weather.setWindSpeed((int)Math.round(windObj.getDouble("speed")));
+                weather.setWindSpeed((int)Math.round(windObj.getDouble("speed") * mph));
                 weather.setWindDeg(windObj.getInt("deg"));
 
                 //Try to get rain/snow volume
@@ -868,7 +843,7 @@ public class MapsActivity extends AppCompatActivity
 
                     //Get wind speed and direction
                     JSONObject windObj = listObj.getJSONObject("wind");
-                    weatherTemp.setWindSpeed((int)Math.round(windObj.getDouble("speed")));
+                    weatherTemp.setWindSpeed((int)Math.round(windObj.getDouble("speed") * mph));
                     weatherTemp.setWindDeg(windObj.getInt("deg"));
 
                     //Try to get rain/snow volume
@@ -1011,11 +986,10 @@ public class MapsActivity extends AppCompatActivity
         );
 
         //Set weather FAB images
-        mTempButton.setImageResource(R.drawable.ic_thermometer_enabled);
+        mTemperatureButton.setImageResource(R.drawable.ic_thermometer_enabled);
         mHumidityButton.setImageResource(R.drawable.ic_humidity);
         mCloudButton.setImageResource(R.drawable.ic_cloud);
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
-        mWindButton.setImageResource(R.drawable.ic_wind);
 
     }
 
@@ -1042,11 +1016,10 @@ public class MapsActivity extends AppCompatActivity
         );
 
         //Set weather FAB images
-        mTempButton.setImageResource(R.drawable.ic_thermometer);
+        mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
         mHumidityButton.setImageResource(R.drawable.ic_humidity_enabled);
         mCloudButton.setImageResource(R.drawable.ic_cloud);
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
-        mWindButton.setImageResource(R.drawable.ic_wind);
 
     }
 
@@ -1072,11 +1045,10 @@ public class MapsActivity extends AppCompatActivity
         );
 
         //Set weather FAB images
-        mTempButton.setImageResource(R.drawable.ic_thermometer);
+        mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
         mHumidityButton.setImageResource(R.drawable.ic_humidity);
         mCloudButton.setImageResource(R.drawable.ic_cloud_enabled);
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
-        mWindButton.setImageResource(R.drawable.ic_wind);
 
     }
 
@@ -1149,58 +1121,10 @@ public class MapsActivity extends AppCompatActivity
         );
 
         //Set weather FAB images
-        mTempButton.setImageResource(R.drawable.ic_thermometer);
+        mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
         mHumidityButton.setImageResource(R.drawable.ic_humidity);
         mCloudButton.setImageResource(R.drawable.ic_cloud);
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation_enabled);
-        mWindButton.setImageResource(R.drawable.ic_wind);
-
-    }
-
-    //Method to draw wind info and overlay
-    public void drawWind() {
-
-        //Change mWeatherText to display humidity
-        mWeatherSelection = 4;
-
-        //Clear map from other circles and add position marker
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
-
-        //Get windDeg and change to string
-        int windDeg = mWeather.getWindDeg();
-        String windDirection = "";
-
-        //Get string direction from wind degrees via 8 point compass
-        if(windDeg < 23){
-            windDirection = "N";
-        } else if(windDeg < 68){
-            windDirection = "NE";
-        } else if(windDeg < 113){
-            windDirection = "E";
-        } else if(windDeg < 158){
-            windDirection = "SE";
-        } else if(windDeg < 203){
-            windDirection = "S";
-        } else if(windDeg < 248){
-            windDirection = "SW";
-        } else if(windDeg < 293){
-            windDirection = "W";
-        } else if(windDeg < 338){
-            windDirection = "NW";
-        } else if(windDeg > 338){
-            windDirection = "N";
-        }
-
-        //Set mWeatherText
-        mWeatherText.setText(mWeather.getWindSpeed() + "m/s" + " " + windDirection);
-
-        //Set weather FAB images
-        mTempButton.setImageResource(R.drawable.ic_thermometer);
-        mHumidityButton.setImageResource(R.drawable.ic_humidity);
-        mCloudButton.setImageResource(R.drawable.ic_cloud);
-        mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
-        mWindButton.setImageResource(R.drawable.ic_wind_enabled);
 
     }
 
@@ -1214,9 +1138,10 @@ public class MapsActivity extends AppCompatActivity
             drawCloud();
         } else if (mWeatherSelection == 3) {
             drawPrecipitation();
-        } else if (mWeatherSelection == 4) {
-            drawWind();
         }
+
+        //Set wind button
+        mWindButton.setRotation(mWeather.getWindDeg());
     }
 
     //Method for updating Navigation menu

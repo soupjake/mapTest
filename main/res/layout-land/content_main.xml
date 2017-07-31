@@ -76,7 +76,21 @@
         tools:layout_constraintRight_creator="1" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/mWeatherButton"
+        android:id="@+id/mWindButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        app:backgroundTint="@color/cardview_light_background"
+        app:fabSize="mini"
+        app:layout_constraintTop_toBottomOf="@id/mWeatherCard"
+        app:layout_constraintLeft_toRightOf="parent"
+        app:srcCompat="@drawable/ic_wind_rose"
+        tools:layout_constraintBottom_creator="1"
+        tools:layout_constraintRight_creator="1" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/mTemperatureButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
@@ -85,178 +99,115 @@
         android:clickable="true"
         app:backgroundTint="@color/cardview_light_background"
         app:fabSize="normal"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@drawable/ic_weather"
+        app:srcCompat="@drawable/ic_thermometer"
         tools:layout_constraintBottom_creator="1"
         tools:layout_constraintRight_creator="1" />
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/mWeatherConstraint"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/mHumidityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:clickable="true"
+        app:backgroundTint="@color/cardview_light_background"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toTopOf="@+id/mTemperatureButton"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        tools:context="com.asuper.maptest.MapsActivity"
-        tools:layout="@layout/activity_maps">
+        app:srcCompat="@drawable/ic_humidity"
+        tools:layout_constraintBottom_creator="1"
+        tools:layout_constraintRight_creator="1" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/mPlaceHolderButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:clickable="false"
-            android:visibility="invisible"
-            app:fabSize="normal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintRight_creator="1" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/mCloudButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:clickable="true"
+        app:backgroundTint="@color/cardview_light_background"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toTopOf="@+id/mHumidityButton"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@drawable/ic_cloud"
+        tools:layout_constraintBottom_creator="1"
+        tools:layout_constraintRight_creator="1" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/mTempButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:clickable="true"
-            app:backgroundTint="@color/cardview_light_background"
-            app:fabSize="normal"
-            app:layout_constraintBottom_toTopOf="@+id/mPlaceHolderButton"
-            app:layout_constraintRight_toRightOf="parent"
-            app:srcCompat="@drawable/ic_thermometer"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintRight_creator="1" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/mPrecipitationButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:clickable="true"
+        app:backgroundTint="@color/cardview_light_background"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toTopOf="@+id/mCloudButton"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@drawable/ic_precipitation"
+        tools:layout_constraintBottom_creator="1"
+        tools:layout_constraintRight_creator="1" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/mHumidityButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:clickable="true"
-            app:backgroundTint="@color/cardview_light_background"
-            app:fabSize="normal"
-            app:layout_constraintBottom_toTopOf="@+id/mTempButton"
-            app:layout_constraintRight_toRightOf="parent"
-            app:srcCompat="@drawable/ic_humidity"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintRight_creator="1" />
+    <TextView
+        android:id="@+id/mPlaceHolderTextView2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_margin="16dp"
+        android:padding="16dp"
+        android:visibility="invisible"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintRight_toLeftOf="@+id/mForecastCard"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_constraintLeft_creator="1"
+        tools:layout_constraintRight_creator="1" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/mCloudButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:clickable="true"
-            app:backgroundTint="@color/cardview_light_background"
-            app:fabSize="normal"
-            app:layout_constraintBottom_toTopOf="@+id/mHumidityButton"
-            app:layout_constraintRight_toRightOf="parent"
-            app:srcCompat="@drawable/ic_cloud"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintRight_creator="1" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/mPrecipitationButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:clickable="true"
-            app:backgroundTint="@color/cardview_light_background"
-            app:fabSize="normal"
-            app:layout_constraintRight_toLeftOf="@+id/mTempButton"
-            app:layout_constraintBottom_toTopOf="@id/mForecastCard"
-            app:srcCompat="@drawable/ic_precipitation"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintRight_creator="1" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/mWindButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:clickable="true"
-            app:backgroundTint="@color/cardview_light_background"
-            app:fabSize="normal"
-            app:layout_constraintBottom_toTopOf="@+id/mPrecipitationButton"
-            app:layout_constraintRight_toLeftOf="@id/mHumidityButton"
-            app:srcCompat="@drawable/ic_wind"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintRight_creator="1" />
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/mForecastCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/mPlaceHolderTextView2"
+        app:layout_constraintRight_toLeftOf="@+id/mTemperatureButton"
+        card_view:cardCornerRadius="4dp"
+        tools:layout_constraintBottom_creator="1"
+        tools:layout_constraintLeft_creator="1"
+        tools:layout_constraintRight_creator="1">
 
         <TextView
-            android:id="@+id/mPlaceHolderTextView2"
-            android:layout_width="0dp"
+            android:id="@+id/mDateText"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:layout_margin="16dp"
+            android:layout_gravity="center"
             android:padding="16dp"
-            android:visibility="invisible"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintRight_toLeftOf="@+id/mForecastCard"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintRight_creator="1" />
+            android:text="Date"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/mForecastCard"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_margin="16dp"
-            android:clickable="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/mPlaceHolderTextView2"
-            app:layout_constraintRight_toLeftOf="@+id/mPlaceHolderButton"
-            card_view:cardCornerRadius="4dp"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintRight_creator="1">
+        <Button
+            android:id="@+id/mLeftButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical|start"
+            android:padding="16dp"
+            android:background="@color/cardview_light_background" />
 
-            <TextView
-                android:id="@+id/mDateText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="16dp"
-                android:text="Date"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+        <Button
+            android:id="@+id/mRightButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="16dp"
+            android:layout_gravity="center_vertical|end"
+            android:background="@drawable/ic_arrow_right" />
 
-            <Button
-                android:id="@+id/mLeftButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center_vertical|start"
-                android:padding="16dp"
-                android:background="@color/cardview_light_background" />
-
-            <Button
-                android:id="@+id/mRightButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="16dp"
-                android:layout_gravity="center_vertical|end"
-                android:background="@drawable/ic_arrow_right" />
-
-        </android.support.v7.widget.CardView>
-    </android.support.constraint.ConstraintLayout>
-
+    </android.support.v7.widget.CardView>
 
 </android.support.constraint.ConstraintLayout>

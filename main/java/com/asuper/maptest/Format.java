@@ -50,9 +50,8 @@ public class Format {
         }
 
         //Combine for rearranged date UK format
-        String formattedDate = new String(time + " " + day + "/" + month);
 
-        return formattedDate;
+        return time + " " + day + "/" + month;
     }
 
     //Method for rounding precipitation volumes to 3 decimal places
@@ -69,6 +68,33 @@ public class Format {
     public static int dpToPx(int dp){
         float floatPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, Resources.getSystem().getDisplayMetrics());
         return Math.round(floatPx);
+    }
+
+    public static String formatWind(int windDeg){
+
+        String windDirection = "";
+
+        //Get string direction from wind degrees via 8 point compass
+        if(windDeg < 23){
+            windDirection = "N";
+        } else if(windDeg < 68){
+            windDirection = "NE";
+        } else if(windDeg < 113){
+            windDirection = "E";
+        } else if(windDeg < 158){
+            windDirection = "SE";
+        } else if(windDeg < 203){
+            windDirection = "S";
+        } else if(windDeg < 248){
+            windDirection = "SW";
+        } else if(windDeg < 293){
+            windDirection = "W";
+        } else if(windDeg < 338){
+            windDirection = "NW";
+        } else if(windDeg > 338){
+            windDirection = "N";
+        }
+        return windDirection;
     }
 
     //Method used for creating fading in or out animation
