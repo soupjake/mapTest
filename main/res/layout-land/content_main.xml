@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
             android:padding="16dp"
-            android:text="Getting weather..."
+            android:text="@string/getting_weather"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
 
@@ -85,7 +85,7 @@
         app:fabSize="mini"
         app:layout_constraintTop_toBottomOf="@id/mWeatherCard"
         app:layout_constraintLeft_toRightOf="parent"
-        app:srcCompat="@drawable/ic_wind_rose"
+        app:srcCompat="@drawable/ic_windarrow"
         tools:layout_constraintBottom_creator="1"
         tools:layout_constraintRight_creator="1" />
 
@@ -189,7 +189,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="16dp"
-            android:text="Date"
+            android:text="@string/getting_forecast"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <Button

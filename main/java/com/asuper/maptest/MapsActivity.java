@@ -6,11 +6,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -780,8 +778,8 @@ public class MapsActivity extends AppCompatActivity
     public void getWeather() {
 
         //Set weather text to say loading
-        mStationNameText.setText("Getting station...");
-        mDescriptionText.setText("Getting weather...");
+        mStationNameText.setText(R.string.getting_station);
+        mDescriptionText.setText(R.string.getting_weather);
         mWeatherText.setText("");
 
         //Get present weather
