@@ -183,7 +183,7 @@
             android:layout_height="40dp"
             android:padding="16dp"
             android:layout_gravity="center_vertical|end"
-            app:background="@drawable/ic_arrow_right" />
+            android:background="@drawable/ic_arrow_right" />
 
     </android.support.v7.widget.CardView>
 
