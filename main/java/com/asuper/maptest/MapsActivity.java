@@ -144,7 +144,6 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         super.onCreate(savedInstanceState);
 
         // Retrieve the content view that renders the map.
@@ -357,7 +356,7 @@ public class MapsActivity extends AppCompatActivity
                                         .build(MapsActivity.this);
                         startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
                     }
-                } catch (GooglePlayServicesRepairableException e) {
+                } catch (GooglePlayServicesRepairableException e ) {
                     e.printStackTrace();
                 } catch (GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
