@@ -46,14 +46,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
-import com.google.android.gms.maps.model.TileProvider;
-import com.google.android.gms.maps.model.UrlTileProvider;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -67,7 +63,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.Vector;
@@ -81,12 +76,9 @@ public class MapsActivity extends AppCompatActivity
     private static final String TAG = "jakesMessage";
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
-    private TileOverlay weatherOverlay;
 
     //OpenWeatherMap API key
     public final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
-    private static String OWM_TILE_URL = "http://tile.openweathermap.org/map/%s/%d/%d/%d.png";
-    private String tileType = "clouds_new";
 
     //Weather object used for overlay
     private Weather mWeather;
@@ -110,7 +102,7 @@ public class MapsActivity extends AppCompatActivity
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
     private final LatLng mDefaultLocation = new LatLng(51.48, -3.21);
-    private static final int DEFAULT_ZOOM = 15;
+    private static final int DEFAULT_ZOOM = 10;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
 
@@ -133,7 +125,6 @@ public class MapsActivity extends AppCompatActivity
 
     //Weather button and card variables
     private FloatingActionButton mTemperatureButton;
-    private FloatingActionButton mHumidityButton;
     private FloatingActionButton mCloudButton;
     private FloatingActionButton mPrecipitationButton;
     private FloatingActionButton mWindButton;
@@ -211,22 +202,6 @@ public class MapsActivity extends AppCompatActivity
                 }
         );
 
-        mHumidityButton = (FloatingActionButton) findViewById(R.id.mHumidityButton);
-        mHumidityButton.setOnClickListener(
-                new FloatingActionButton.OnClickListener(){
-
-                    @Override
-                    public void onClick(View v) {
-
-                        drawHumidity();
-                        //Draw toast to say weather type being displayed
-                        Toast toast = Toast.makeText(getApplicationContext(), "Humidity", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
-                        toast.show();
-                    }
-                }
-        );
-
         mCloudButton = (FloatingActionButton) findViewById(R.id.mCloudButton);
         mCloudButton.setOnClickListener(
                 new FloatingActionButton.OnClickListener(){
@@ -263,10 +238,9 @@ public class MapsActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(View v) {
+                        drawWind();
                         //Draw toast to say weather type being displayed
-                        Toast toast = Toast.makeText(getApplicationContext(),
-                                "Wind: " + mWeather.getWindSpeed() + "mph" + " " + Format.formatWind(mWeather.getWindDeg())
-                                , Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplicationContext(), "Wind", Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
                         toast.show();
                     }
@@ -550,7 +524,7 @@ public class MapsActivity extends AppCompatActivity
             updateNavigationMenu();
         }
 
-        weatherOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(createTransparentTileProvider()));
+
 
         //Click listener to update location based on clicking on map
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -970,6 +944,14 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
+    //Method for drawing weather tile layer
+
+    public void drawTileLayer(String tileType){
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
+        mMap.addTileOverlay(new TileOverlayOptions().tileProvider(new TransparentTileOWM(tileType)));
+    }
+
     //Method to draw temperature info and overlay
     public void drawTemperature() {
 
@@ -977,86 +959,31 @@ public class MapsActivity extends AppCompatActivity
         mWeatherSelection = 0;
         mWeatherText.setText((Integer.toString(mWeather.getTemp()) + mDegrees + "C"));
 
-        //Clear map from other circles and add position marker
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
-
-        //Get temperature and corresponding colour
-        int temperature = mWeather.getTemp();
-        int color = TemperatureColors.getTemperatureColor(temperature);
-
-        //Draw temperature circle onto map
-        Circle circle = mMap.addCircle(new CircleOptions()
-                .center(new LatLng(mLat, mLon))
-                .radius(2000) //in metres
-                .strokeWidth(0)
-                .fillColor(color)
-        );
+        //Draw the weather layer
+        drawTileLayer("temp_new");
 
         //Set weather FAB images
         mTemperatureButton.setImageResource(R.drawable.ic_thermometer_enabled);
-        mHumidityButton.setImageResource(R.drawable.ic_humidity);
         mCloudButton.setImageResource(R.drawable.ic_cloud);
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
+        mWindButton.setImageResource(R.drawable.ic_wind);
 
     }
 
-
-    //Method to draw humidity info and overlay
-    public void drawHumidity() {
-
-        //Change mWeatherText to display humidity
-        mWeatherSelection = 1;
-        mWeatherText.setText(Integer.toString(mWeather.getHumidity()) + "%");
-
-        //Clear map from other circles and add position marker
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
-
-        //Draw humidity circle onto map
-        int humidity = (int)(mWeather.getHumidity() * 1.5);
-        int color = Color.argb(humidity, 124,252,0);
-        Circle circle = mMap.addCircle(new CircleOptions()
-                .center(new LatLng(mLat, mLon))
-                .radius(2000) //in metres
-                .strokeWidth(0)
-                .fillColor(color)
-        );
-
-        //Set weather FAB images
-        mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
-        mHumidityButton.setImageResource(R.drawable.ic_humidity_enabled);
-        mCloudButton.setImageResource(R.drawable.ic_cloud);
-        mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
-
-    }
-
-    //Method to draw cloud info and overlay
+        //Method to draw cloud info and overlay
     public void drawCloud() {
 
         //Change mWeatherText to display humidity
         mWeatherSelection = 2;
         mWeatherText.setText(Integer.toString(mWeather.getCloudPercentage()) + "%");
 
-        //Clear map from other circles and add position marker
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
-
-        //Draw humidity circle onto map
-        int clouds = (int)(mWeather.getCloudPercentage() * 1.5);
-        int color = Color.argb(clouds, 128,128,128);
-        Circle circle = mMap.addCircle(new CircleOptions()
-                .center(new LatLng(mLat, mLon))
-                .radius(2000) //in metres
-                .strokeWidth(0)
-                .fillColor(color)
-        );
+        drawTileLayer("clouds_new");
 
         //Set weather FAB images
         mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
-        mHumidityButton.setImageResource(R.drawable.ic_humidity);
         mCloudButton.setImageResource(R.drawable.ic_cloud_enabled);
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
+        mWindButton.setImageResource(R.drawable.ic_wind);
 
     }
 
@@ -1065,17 +992,10 @@ public class MapsActivity extends AppCompatActivity
 
         //Change mWeatherText to display precipitation
         mWeatherSelection = 3;
-
-        //Clear map from other circles and add position marker
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
-
-        //Set variables used for method
-        double precipitation = 0.0;
-        String type = "";
-        int precipitationAlpha = 0;
-
         //Set weather info for forecast weather
+        String type = "";
+        double precipitation = 0.0;
+
         if (mWeather.getRainVolume() != 0.0) {
             type = "Rain";
             precipitation = Format.roundVolume(mWeather.getRainVolume());
@@ -1088,51 +1008,30 @@ public class MapsActivity extends AppCompatActivity
             mWeatherText.setText("0mm/3h");
         }
 
-        //Selecting opacity of circle depending on volume
-        if (precipitation == 0.0){
-            precipitationAlpha = 0;
-        } else if(precipitation < 1.0) {
-            precipitationAlpha = 50;
-        } else if(precipitation < 4.0) {
-            precipitationAlpha = 75;
-        } else if(precipitation < 8.0) {
-            precipitationAlpha = 100;
-        } else if(precipitation < 16.0) {
-            precipitationAlpha = 125;
-        } else if(precipitation > 16.0) {
-            precipitationAlpha = 150;
-        }
-
-        //Make colour blue by default as rain more common
-        int color = Color.argb(precipitationAlpha, 0,191,255);
-
-        //Make colour white if type is snow
-        if (type.equals("Snow")){
-            color = Color.argb(precipitationAlpha, 255,255,255);
-        }
-
-        //Set overlay color if currently raining/snowing
-        if (mWeather.getDate().equals("Present") && mWeather.getCondition().equals("Rain")){
-            color = Color.argb(75, 0, 191, 255);
-            mWeatherText.setText("");
-        } else if (mWeather.getDate().equals("Present") && mWeather.getCondition().equals("Snow")){
-            color = Color.argb(75, 255, 255, 255);
-            mWeatherText.setText("");
-        }
-
-        //Draw precipitation circle onto map
-        Circle circle = mMap.addCircle(new CircleOptions()
-                .center(new LatLng(mLat, mLon))
-                .radius(2000) //in metres
-                .strokeWidth(0)
-                .fillColor(color)
-        );
+        drawTileLayer("precipitation_new");
 
         //Set weather FAB images
         mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
-        mHumidityButton.setImageResource(R.drawable.ic_humidity);
         mCloudButton.setImageResource(R.drawable.ic_cloud);
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation_enabled);
+        mWindButton.setImageResource(R.drawable.ic_wind);
+
+    }
+
+    //Method to draw wind info and overlay
+    public void drawWind() {
+
+        //Change mWeatherText to display humidity
+        mWeatherSelection = 1;
+        mWeatherText.setText(mWeather.getWindSpeed() + "mph" + " " + Format.formatWind(mWeather.getWindDeg()));
+
+        drawTileLayer("wind_new");
+
+        //Set weather FAB images
+        mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
+        mCloudButton.setImageResource(R.drawable.ic_cloud);
+        mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
+        mWindButton.setImageResource(R.drawable.ic_wind_enabled);
 
     }
 
@@ -1141,15 +1040,13 @@ public class MapsActivity extends AppCompatActivity
         if(mWeatherSelection == 0 ){
             drawTemperature();
         } else if (mWeatherSelection == 1) {
-            drawHumidity();
+            drawWind();
         } else if (mWeatherSelection == 2) {
             drawCloud();
         } else if (mWeatherSelection == 3) {
             drawPrecipitation();
         }
 
-        //Set wind button
-        mWindButton.setRotation(mWeather.getWindDeg());
     }
 
     //Method for updating Navigation menu
@@ -1175,8 +1072,6 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    private TileProvider createTransparentTileProvider() {
-        return new TransparentTileOWM(tileType);
-    }
+
 
 }
