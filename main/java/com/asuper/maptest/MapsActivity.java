@@ -50,6 +50,10 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.android.gms.maps.model.TileProvider;
+import com.google.android.gms.maps.model.UrlTileProvider;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -63,6 +67,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.Vector;
@@ -76,9 +81,12 @@ public class MapsActivity extends AppCompatActivity
     private static final String TAG = "jakesMessage";
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
+    private TileOverlay weatherOverlay;
 
     //OpenWeatherMap API key
-    private final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
+    public final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
+    private static String OWM_TILE_URL = "http://tile.openweathermap.org/map/%s/%d/%d/%d.png";
+    private String tileType = "clouds_new";
 
     //Weather object used for overlay
     private Weather mWeather;
@@ -541,6 +549,8 @@ public class MapsActivity extends AppCompatActivity
             selectForecast(mForecastSelection);
             updateNavigationMenu();
         }
+
+        weatherOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(createTransparentTileProvider()));
 
         //Click listener to update location based on clicking on map
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -1163,6 +1173,10 @@ public class MapsActivity extends AppCompatActivity
         } else{
             settingsSubMenu.getItem(0).setIcon(R.drawable.ic_radio_button_unchecked);
         }
+    }
+
+    private TileProvider createTransparentTileProvider() {
+        return new TransparentTileOWM(tileType);
     }
 
 }
