@@ -117,7 +117,7 @@
         tools:layout_constraintRight_creator="1" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/mWindyButton"
+        android:id="@+id/mWindButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"

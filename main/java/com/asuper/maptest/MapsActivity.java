@@ -13,7 +13,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,13 +20,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,8 +45,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.android.gms.maps.model.TileProvider;
+import com.google.android.gms.maps.model.UrlTileProvider;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -63,9 +61,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
-import java.util.Vector;
 
 public class MapsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -80,11 +78,9 @@ public class MapsActivity extends AppCompatActivity
     //OpenWeatherMap API key
     public final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
 
+
     //Weather object used for overlay
     private Weather mWeather;
-
-    //Vector to store forecast information
-    private Vector<Weather> mWeatherVec;
 
     //LinkedList to implement FIFO queue for Station locations
     private LinkedList<Station> mStationList;
@@ -134,13 +130,6 @@ public class MapsActivity extends AppCompatActivity
     private String mStationName;
     private String mCountryCode;
 
-
-    //Forecast ard variables
-    private TextView mDateText;
-    private Button mLeftButton;
-    private Button mRightButton;
-    private int mForecastSelection;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -160,32 +149,6 @@ public class MapsActivity extends AppCompatActivity
         mDescriptionText = (TextView) findViewById(R.id.mDescriptionText);
         mWeatherText = (TextView) findViewById(R.id.mWeatherText);
 
-        //Set up forecast CardView
-        mDateText = (TextView) findViewById(R.id.mDateText);
-        mLeftButton = (Button) findViewById(R.id.mLeftButton);
-        mLeftButton.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                if (mForecastSelection != 0){
-                    --mForecastSelection;
-                }
-                selectForecast(mForecastSelection);
-            }
-        });
-
-        mRightButton = (Button) findViewById(R.id.mRightButton);
-        mRightButton.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                if (mForecastSelection != mWeatherVec.size()-1){
-                    ++mForecastSelection;
-                }
-                selectForecast(mForecastSelection);
-            }
-        });
-
         //Set up weather Buttons
         mTemperatureButton = (FloatingActionButton) findViewById(R.id.mTemperatureButton);
         mTemperatureButton.setOnClickListener(
@@ -196,7 +159,6 @@ public class MapsActivity extends AppCompatActivity
                         drawTemperature();
                         //Draw toast to say weather type being displayed
                         Toast toast = Toast.makeText(getApplicationContext(), "Temperature", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
                         toast.show();
                     }
                 }
@@ -211,7 +173,6 @@ public class MapsActivity extends AppCompatActivity
                         drawCloud();
                         //Draw toast to say weather type being displayed
                         Toast toast = Toast.makeText(getApplicationContext(), "Clouds", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
                         toast.show();
                     }
                 }
@@ -226,7 +187,6 @@ public class MapsActivity extends AppCompatActivity
                         drawPrecipitation();
                         //Draw toast to say weather type being displayed
                         Toast toast = Toast.makeText(getApplicationContext(), "Precipitation", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
                         toast.show();
                     }
                 }
@@ -241,7 +201,6 @@ public class MapsActivity extends AppCompatActivity
                         drawWind();
                         //Draw toast to say weather type being displayed
                         Toast toast = Toast.makeText(getApplicationContext(), "Wind", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER|Gravity.BOTTOM, 0, Format.dpToPx(88));
                         toast.show();
                     }
                 }
@@ -277,21 +236,19 @@ public class MapsActivity extends AppCompatActivity
             mLat = gson.fromJson(mLatJSON, double.class);
             String mLonJSON = sharedPref.getString("mLon", null);
             mLon = gson.fromJson(mLonJSON, double.class);
-            String mWeatherVecJSON = sharedPref.getString("mWeatherVec", null);
-            mWeatherVec = gson.fromJson(mWeatherVecJSON, new TypeToken<Vector<Weather>>() {}.getType());
+            String mWeatherJSON = sharedPref.getString("mWeather", null);
+            mWeather = gson.fromJson(mWeatherJSON, Weather.class);
             String mStationListJSON = sharedPref.getString("mStationList", null);
             mStationList = gson.fromJson(mStationListJSON, new TypeToken<LinkedList<Station>>() {}.getType());
 
             //Get UI preferences
             mWeatherSelection = sharedPref.getInt("mWeatherSelection", 0);
-            mForecastSelection = sharedPref.getInt("mForecastSelection", 0);
             mFilterSearch = sharedPref.getBoolean("mFilterSearch", true);
 
         } catch (Exception e){
             e.printStackTrace();
             //Initialise objects default
             mWeather = new Weather();
-            mWeatherVec = new Vector<>();
             mStationList = new LinkedList<>();
             mFilterSearch = true;
         }
@@ -358,8 +315,6 @@ public class MapsActivity extends AppCompatActivity
             case R.id.mRefreshButton:
                 //Refresh weather and mForecastSelection
                 getWeather();
-                mForecastSelection = 0;
-                selectForecast(mForecastSelection);
                 return true;
 
             default:
@@ -426,14 +381,13 @@ public class MapsActivity extends AppCompatActivity
             editor.putString("mLat", mLatJSON);
             String mLonJSON = gson.toJson(mLon);
             editor.putString("mLon", mLonJSON);
-            String mWeatherVecJSON = gson.toJson(mWeatherVec);
-            editor.putString("mWeatherVec", mWeatherVecJSON);
+            String mWeatherJSON = gson.toJson(mWeather);
+            editor.putString("mWeather",mWeatherJSON);
             String mStationListJSON = gson.toJson(mStationList);
             editor.putString("mStationList", mStationListJSON);
 
             //Save UI preferences
             editor.putInt("mWeatherSelection", mWeatherSelection);
-            editor.putInt("mForecastSelection", mForecastSelection);
             editor.putBoolean("mFilterSearch", mFilterSearch);
             editor.apply();
         }
@@ -520,8 +474,8 @@ public class MapsActivity extends AppCompatActivity
 
         } else {
             updateLocationUI();
-            selectForecast(mForecastSelection);
             updateNavigationMenu();
+            drawWeather();
         }
 
 
@@ -636,9 +590,6 @@ public class MapsActivity extends AppCompatActivity
             //Weather object for first city weather to load as default
             Weather weather = new Weather();
 
-            //Clear weatherVec so new data can be loaded in
-            mWeatherVec.clear();
-
             try {
                 URL url = new URL(strings[0]);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -713,7 +664,7 @@ public class MapsActivity extends AppCompatActivity
             //Check if default "Earth" isn't name
             if(!weather.getStationName().equals("Earth")){
                 //Set global weather object based on location
-                mWeatherVec.add(weather);
+                mWeather = weather;
 
                 //Create Station object
                 Station station = new Station();
@@ -747,13 +698,11 @@ public class MapsActivity extends AppCompatActivity
 
                 //Set text variables
                 mStationName = weather.getStationName();
-
                 mCountryCode = weather.getCountryCode();
 
                 //Draw weather
                 drawWeather();
 
-                getForecast();
             }
         }
     }
@@ -767,153 +716,11 @@ public class MapsActivity extends AppCompatActivity
         mWeatherText.setText("");
 
         //Get present weather
-        String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + mLat + "&lon=" + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
+        String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + mLat + "&lon="
+                + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
         new WeatherTask().execute(url);
 
     }
-
-    private class ForecastTask extends AsyncTask<String, Void, Weather> {
-
-        @Override
-        protected Weather doInBackground(String... strings) {
-
-            //Weather object for first city weather to load as default
-            Weather weather = new Weather();
-
-            try {
-                URL url = new URL(strings[0]);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-                InputStream stream = new BufferedInputStream(urlConnection.getInputStream());
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream));
-                StringBuilder builder = new StringBuilder();
-
-                String inputString;
-                while ((inputString = bufferedReader.readLine()) != null) {
-                    builder.append(inputString);
-                }
-
-                //Object to hold JSON information
-                JSONObject weatherJSON = new JSONObject(builder.toString());
-                JSONArray listArray = weatherJSON.getJSONArray("list");
-                //Add each object in the array to the weatherVector
-                for(int i = 0; i < listArray.length() ; i++) {
-                    JSONObject listObj = listArray.getJSONObject(i);
-
-                    //Create temp weather object
-                    Weather weatherTemp = new Weather();
-
-                    //JSONArray of weather type
-                    JSONArray weatherArray = listObj.getJSONArray("weather");
-                    JSONObject weatherObj = weatherArray.getJSONObject(0);
-                    weatherTemp.setCondition(weatherObj.getString("main"));
-                    weatherTemp.setDescription(Format.stringCapitalise(weatherObj.getString("description")));
-
-                    //Set string variables
-                    weatherTemp.setStationName(mStationName);
-                    weatherTemp.setCountryCode(mCountryCode);
-
-
-                    //JSON Object of main weather doubles
-                    JSONObject main = listObj.getJSONObject("main");
-                    weatherTemp.setTemp((int)Math.round(main.getDouble("temp")));
-                    weatherTemp.setHumidity(main.getInt("humidity"));
-
-                    //Get cloud percentage
-                    JSONObject cloudObj = listObj.getJSONObject("clouds");
-                    weatherTemp.setCloudPercentage(cloudObj.getInt("all"));
-
-                    //Get wind speed and direction
-                    JSONObject windObj = listObj.getJSONObject("wind");
-                    weatherTemp.setWindSpeed((int)Math.round(windObj.getDouble("speed") * mph));
-                    weatherTemp.setWindDeg(windObj.getInt("deg"));
-
-                    //Try to get rain/snow volume
-                    try{
-                        JSONObject rainObj = listObj.getJSONObject("rain");
-                        weatherTemp.setRainVolume(rainObj.getDouble("3h"));
-                    } catch (JSONException e) {
-                        //Do nothing as not needed if null
-                    }
-                    try{
-                        JSONObject snowObj = listObj.getJSONObject("snow");
-                        weatherTemp.setSnowVolume(snowObj.getDouble("3h"));
-                    } catch (JSONException e) {
-                        //Do nothing as not needed if null
-                    }
-
-                    //JSON Object of weather date for forecast
-                    String date = (Format.formatDate(String.valueOf(listObj.get("dt_txt"))));
-                    weatherTemp.setDate(date);
-
-                    //Add to forecastVec
-                    mWeatherVec.add(weatherTemp);
-                }
-
-                //Set first item in weatherVector as default (not used atm)
-                weather = mWeatherVec.get(1);
-
-                urlConnection.disconnect();
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
-            return weather;
-        }
-
-        @Override
-        protected void onPostExecute(Weather weather) {
-            super.onPostExecute(weather);
-
-            selectForecast(mForecastSelection);
-
-        }
-
-    }
-
-    //Method to getting forecast
-    public void getForecast() {
-
-        //Get forecast weather
-        String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + mLat + "&lon=" + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
-        new ForecastTask().execute(url);
-
-    }
-
-
-
-        //Method for getting forecast weather
-    public void selectForecast(int forecastItem){
-
-        //Set mWeather to corresponding item in weather vector
-        mWeather = mWeatherVec.get(forecastItem);
-
-        //Set date and weather description text
-        mStationNameText.setText(mWeather.getStationName());
-        mDateText.setText(mWeather.getDate());
-        mDescriptionText.setText(mWeather.getDescription());
-
-        //Draw weather
-        drawWeather();
-
-        //Set forecast buttons to be disabled or enabled based on mWeatherSelection
-        if(mForecastSelection == 0){
-            mLeftButton.setEnabled(false);
-            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
-        } else {
-            mLeftButton.setEnabled(true);
-            mLeftButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_left, null));
-        }
-        if(mForecastSelection == mWeatherVec.size()-1){
-            mRightButton.setEnabled(false);
-            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.cardview_light_background, null));
-        } else {
-            mRightButton.setEnabled(true);
-            mRightButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_right, null));
-        }
-
-    }
-
-
 
     //Method for allowing Google Places intent on search button
     @Override
@@ -949,7 +756,7 @@ public class MapsActivity extends AppCompatActivity
     public void drawTileLayer(String tileType){
         mMap.clear();
         mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
-        mMap.addTileOverlay(new TileOverlayOptions().tileProvider(new TransparentTileOWM(tileType)));
+        mMap.addTileOverlay(new TileOverlayOptions().tileProvider(createTilePovider(tileType)));
     }
 
     //Method to draw temperature info and overlay
@@ -1037,6 +844,10 @@ public class MapsActivity extends AppCompatActivity
 
     //Method for drawing same weather as selected before
     public void drawWeather(){
+
+        mStationNameText.setText(mWeather.getStationName());
+        mDescriptionText.setText(mWeather.getDescription());
+
         if(mWeatherSelection == 0 ){
             drawTemperature();
         } else if (mWeatherSelection == 1) {
@@ -1072,6 +883,24 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
+    public TileProvider createTilePovider(final String tileType) {
+        return new UrlTileProvider(256, 256) {
 
+            String OWM_TILE_URL = "http://tile.openweathermap.org/map/%s/%d/%d/%d.png?appid=" + APP_ID ;
+
+            @Override
+            public URL getTileUrl(int x, int y, int zoom) {
+                String fUrl = String.format(OWM_TILE_URL, tileType, zoom, x, y);
+                URL url = null;
+                try {
+                    url = new URL(fUrl);
+                } catch (MalformedURLException mfe) {
+                    mfe.printStackTrace();
+                }
+
+                return url;
+            }
+        };
+    }
 
 }
