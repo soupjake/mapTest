@@ -6,18 +6,18 @@
         android:id="@+id/mSearchButton"
         android:icon="@drawable/ic_search"
         android:title=""
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/mLocationButton"
         android:icon="@drawable/ic_my_location"
         android:title=""
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/mRefreshButton"
         android:icon="@drawable/ic_refresh"
         android:title=""
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
 
 </menu>

@@ -754,7 +754,7 @@ public class MapsActivity extends AppCompatActivity
     public void drawTileLayer(String tileType){
         mMap.clear();
         mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
-        mMap.addTileOverlay(new TileOverlayOptions().tileProvider(createTilePovider(tileType)));
+        mMap.addTileOverlay(new TileOverlayOptions().tileProvider(createTileProvider(tileType)));
     }
 
     //Method to draw temperature info and overlay
@@ -881,7 +881,7 @@ public class MapsActivity extends AppCompatActivity
         }
     }
 
-    public TileProvider createTilePovider(final String tileType) {
+    public TileProvider createTileProvider(final String tileType) {
         return new UrlTileProvider(256, 256) {
 
             String OWM_TILE_URL = "http://tile.openweathermap.org/map/%s/%d/%d/%d.png?appid=" + APP_ID ;
