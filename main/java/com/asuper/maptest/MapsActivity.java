@@ -313,6 +313,8 @@ public class MapsActivity extends AppCompatActivity
 
             case R.id.mRefreshButton:
                 //Refresh weather and mForecastSelection
+                mMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+                        new CameraPosition(new LatLng(mLat, mLon), DEFAULT_ZOOM, 0, 0)));
                 getWeather();
                 return true;
 
@@ -566,8 +568,8 @@ public class MapsActivity extends AppCompatActivity
 
         // Set the map's camera position to the location of the device.
         if (mLat != 0) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(mLat, mLon), DEFAULT_ZOOM));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(
+                    new LatLng(mLat, mLon)));
         } else {
             Log.d(TAG, "Current location is null. Using defaults.");
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
