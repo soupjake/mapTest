@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -236,8 +235,8 @@ public class MapsActivity extends AppCompatActivity
             mLat = gson.fromJson(mLatJSON, double.class);
             String mLonJSON = sharedPref.getString("mLon", null);
             mLon = gson.fromJson(mLonJSON, double.class);
-            String mWeatherJSON = sharedPref.getString("mWeather", null);
-            mWeather = gson.fromJson(mWeatherJSON, Weather.class);
+            String mCameraPositionJSON = sharedPref.getString("mCameraPosition", null);
+            mCameraPosition = gson.fromJson(mCameraPositionJSON, CameraPosition.class);
             String mStationListJSON = sharedPref.getString("mStationList", null);
             mStationList = gson.fromJson(mStationListJSON, new TypeToken<LinkedList<Station>>() {}.getType());
 
@@ -381,10 +380,11 @@ public class MapsActivity extends AppCompatActivity
             editor.putString("mLat", mLatJSON);
             String mLonJSON = gson.toJson(mLon);
             editor.putString("mLon", mLonJSON);
-            String mWeatherJSON = gson.toJson(mWeather);
-            editor.putString("mWeather",mWeatherJSON);
+            String mCameraPositionJSON = gson.toJson(mMap.getCameraPosition());
+            editor.putString("mCameraPosition", mCameraPositionJSON);
             String mStationListJSON = gson.toJson(mStationList);
             editor.putString("mStationList", mStationListJSON);
+
 
             //Save UI preferences
             editor.putInt("mWeatherSelection", mWeatherSelection);
@@ -473,9 +473,8 @@ public class MapsActivity extends AppCompatActivity
             getWeather();
 
         } else {
-            updateLocationUI();
-            updateNavigationMenu();
-            drawWeather();
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
+            getWeather();
         }
 
 
@@ -560,22 +559,19 @@ public class MapsActivity extends AppCompatActivity
 
         if (mLocationPermissionGranted) {
             mMap.clear();
-            mMap.setMyLocationEnabled(false);
             mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
         } else {
-            mMap.setMyLocationEnabled(false);
             mLocation = null;
         }
 
         // Set the map's camera position to the location of the device.
-        if (mCameraPosition != null) {
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
-        } else if (mLat != 0) {
+        if (mLat != 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(mLat, mLon), DEFAULT_ZOOM));
         } else {
             Log.d(TAG, "Current location is null. Using defaults.");
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    mDefaultLocation, DEFAULT_ZOOM));
         }
     }
 
