@@ -77,19 +77,13 @@ public class MapsActivity extends AppCompatActivity
     //OpenWeatherMap API key
     public final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
 
-
     //Weather object used for overlay
     private Weather mWeather;
 
     //LinkedList to implement FIFO queue for Station locations
     private LinkedList<Station> mStationList;
 
-    //String variable to set unit type
-    private String mUnits = "metric";
 
-    //Unit variables
-    private String mDegrees = "\u00b0";
-    private double mph = 2.23694;
 
     // The entry point to Google Play services, used by the Places API and Fused Location Provider.
     private GoogleApiClient mGoogleApiClient;
@@ -128,6 +122,11 @@ public class MapsActivity extends AppCompatActivity
     private int mWeatherSelection;
     private String mStationName;
     private String mCountryCode;
+
+    //Variables to set units
+    private String mDegrees = "\u00b0";
+    private boolean mTemperatureUnits;
+    private boolean mWindUnits;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -243,6 +242,8 @@ public class MapsActivity extends AppCompatActivity
             //Get UI preferences
             mWeatherSelection = sharedPref.getInt("mWeatherSelection", 0);
             mFilterSearch = sharedPref.getBoolean("mFilterSearch", true);
+            mTemperatureUnits = sharedPref.getBoolean("mTemperatureUnits", true);
+            mWindUnits = sharedPref.getBoolean("mWindUnits", true);
 
         } catch (Exception e){
             e.printStackTrace();
@@ -250,6 +251,8 @@ public class MapsActivity extends AppCompatActivity
             mWeather = new Weather();
             mStationList = new LinkedList<>();
             mFilterSearch = true;
+            mTemperatureUnits = true;
+            mWindUnits = true;
         }
 
         // Build the Play services client for use by the Fused Location Provider and the Places API.
@@ -359,6 +362,37 @@ public class MapsActivity extends AppCompatActivity
                 mFilterSearch = true;
                 item.setIcon(R.drawable.ic_radio_button_checked);
             }
+
+        } else if(item.getTitle().equals("Temperature Units")){
+            if(mTemperatureUnits){
+                mTemperatureUnits = false;
+                item.setIcon(R.drawable.ic_radio_button_unchecked);
+                if(mWeatherSelection == 0){
+                    mWeatherText.setText(Format.celsiusToFahrenheit(mWeather.getTemp()) + mDegrees + "F");
+                }
+            } else {
+                mTemperatureUnits = true;
+                item.setIcon(R.drawable.ic_radio_button_checked);
+                if(mWeatherSelection == 0){
+                    mWeatherText.setText(mWeather.getTemp() + mDegrees + "C");
+                }
+            }
+        } else if (item.getTitle().equals("Wind Units")){
+            if(mWindUnits){
+                mWindUnits = false;
+                item.setIcon(R.drawable.ic_radio_button_unchecked);
+                if(mWeatherSelection == 3){
+                    mWeatherText.setText(mWeather.getWindSpeed() + "m/s"
+                            + " " + Format.formatWind(mWeather.getWindDeg()));
+                }
+            } else {
+                mWindUnits = true;
+                item.setIcon(R.drawable.ic_radio_button_checked);
+                if(mWeatherSelection == 3){
+                    mWeatherText.setText(Format.windMph(mWeather.getWindSpeed()) + "mph"
+                            + " " + Format.formatWind(mWeather.getWindDeg()));
+                }
+            }
         }
 
         return true;
@@ -391,6 +425,8 @@ public class MapsActivity extends AppCompatActivity
             //Save UI preferences
             editor.putInt("mWeatherSelection", mWeatherSelection);
             editor.putBoolean("mFilterSearch", mFilterSearch);
+            editor.putBoolean("mTemperatureUnits", mTemperatureUnits);
+            editor.putBoolean("mWindUnits", mWindUnits);
             editor.apply();
         }
     }
@@ -631,7 +667,7 @@ public class MapsActivity extends AppCompatActivity
 
                 //Get wind speed and direction
                 JSONObject windObj = weatherJSON.getJSONObject("wind");
-                weather.setWindSpeed((int)Math.round(windObj.getDouble("speed") * mph));
+                weather.setWindSpeed((int)Math.round(windObj.getDouble("speed")));
                 weather.setWindDeg(windObj.getInt("deg"));
 
                 //Try to get rain/snow volume
@@ -715,7 +751,7 @@ public class MapsActivity extends AppCompatActivity
 
         //Get present weather
         String url = "http://api.openweathermap.org/data/2.5/weather?lat=" + mLat + "&lon="
-                + mLon + "&units=" + mUnits + "&appid=" + APP_ID;
+                + mLon + "&units=metric&appid=" + APP_ID;
         new WeatherTask().execute(url);
 
     }
@@ -762,8 +798,12 @@ public class MapsActivity extends AppCompatActivity
 
         //Change mWeatherText to display humidity
         mWeatherSelection = 0;
-        mWeatherText.setText((Integer.toString(mWeather.getTemp()) + mDegrees + "C"));
 
+        if(mTemperatureUnits){
+            mWeatherText.setText(mWeather.getTemp() + mDegrees + "C");
+        } else {
+            mWeatherText.setText(Format.celsiusToFahrenheit(mWeather.getTemp()) + mDegrees + "F");
+        }
         //Draw the weather layer
         drawTileLayer("temp_new");
 
@@ -779,8 +819,8 @@ public class MapsActivity extends AppCompatActivity
     public void drawCloud() {
 
         //Change mWeatherText to display humidity
-        mWeatherSelection = 2;
-        mWeatherText.setText(Integer.toString(mWeather.getCloudPercentage()) + "%");
+        mWeatherSelection = 1;
+        mWeatherText.setText(mWeather.getCloudPercentage() + "%");
 
         drawTileLayer("clouds_new");
 
@@ -796,21 +836,18 @@ public class MapsActivity extends AppCompatActivity
     public void drawPrecipitation(){
 
         //Change mWeatherText to display precipitation
-        mWeatherSelection = 3;
+        mWeatherSelection = 2;
         //Set weather info for forecast weather
-        String type = "";
         double precipitation = 0.0;
 
         if (mWeather.getRainVolume() != 0.0) {
-            type = "Rain";
             precipitation = Format.roundVolume(mWeather.getRainVolume());
-            mWeatherText.setText(Double.toString(precipitation) + "mm/3h");
+            mWeatherText.setText(precipitation + "mm/3h");
         } else if (mWeather.getSnowVolume() != 0.0) {
-            type = "Snow";
             precipitation = Format.roundVolume(mWeather.getSnowVolume());
-            mWeatherText.setText(Double.toString(precipitation) + "mm/3h");
+            mWeatherText.setText(precipitation + "mm/3h");
         } else {
-            mWeatherText.setText("0mm/3h");
+            mWeatherText.setText("");
         }
 
         drawTileLayer("precipitation_new");
@@ -827,8 +864,15 @@ public class MapsActivity extends AppCompatActivity
     public void drawWind() {
 
         //Change mWeatherText to display humidity
-        mWeatherSelection = 1;
-        mWeatherText.setText(mWeather.getWindSpeed() + "mph" + " " + Format.formatWind(mWeather.getWindDeg()));
+        mWeatherSelection = 3;
+
+        if(mWindUnits){
+            mWeatherText.setText(Format.windMph(mWeather.getWindSpeed()) + "mph"
+                    + " " + Format.formatWind(mWeather.getWindDeg()));
+        } else {
+            mWeatherText.setText(mWeather.getWindSpeed() + "m/s"
+                    + " " + Format.formatWind(mWeather.getWindDeg()));
+        }
 
         drawTileLayer("wind_new");
 
@@ -849,11 +893,11 @@ public class MapsActivity extends AppCompatActivity
         if(mWeatherSelection == 0 ){
             drawTemperature();
         } else if (mWeatherSelection == 1) {
-            drawWind();
-        } else if (mWeatherSelection == 2) {
             drawCloud();
-        } else if (mWeatherSelection == 3) {
+        } else if (mWeatherSelection == 2) {
             drawPrecipitation();
+        } else if (mWeatherSelection == 3) {
+            drawWind();
         }
 
     }
@@ -878,6 +922,18 @@ public class MapsActivity extends AppCompatActivity
             settingsSubMenu.getItem(0).setIcon(R.drawable.ic_radio_button_checked);
         } else{
             settingsSubMenu.getItem(0).setIcon(R.drawable.ic_radio_button_unchecked);
+        }
+        settingsSubMenu.add(1, 1, 0, "Temperature Units");
+        if(mTemperatureUnits){
+            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_checked);
+        } else{
+            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_unchecked);
+        }
+        settingsSubMenu.add(1, 2, 0, "Wind Units");
+        if(mWindUnits){
+            settingsSubMenu.getItem(2).setIcon(R.drawable.ic_radio_button_checked);
+        } else{
+            settingsSubMenu.getItem(2).setIcon(R.drawable.ic_radio_button_unchecked);
         }
     }
 

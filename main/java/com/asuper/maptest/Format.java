@@ -54,6 +54,14 @@ public class Format {
         return time + " " + day + "/" + month;
     }
 
+    public static int celsiusToFahrenheit(int celsius){
+        return Math.round(9 * (celsius/5) + 32);
+    }
+
+    public static int windMph(int wind){
+        return (int)Math.round(wind * 2.23694);
+    }
+
     //Method for rounding precipitation volumes to 3 decimal places
     public static double roundVolume(double volume){
 
