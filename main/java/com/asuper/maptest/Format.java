@@ -72,12 +72,6 @@ public class Format {
 
     }
 
-    //Method for converting dp to pixel
-    public static int dpToPx(int dp){
-        float floatPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, Resources.getSystem().getDisplayMetrics());
-        return Math.round(floatPx);
-    }
-
     public static String formatWind(int windDeg){
 
         String windDirection = "";
@@ -104,14 +98,5 @@ public class Format {
         }
         return windDirection;
     }
-
-    //Method used for creating fading in or out animation
-    public static AlphaAnimation fadeAnimation(int fadeIn, int fadeOut){
-        AlphaAnimation animation = new AlphaAnimation(fadeIn, fadeOut);
-        animation.setDuration(500);
-        return animation;
-    }
-
-
 
 }

@@ -362,17 +362,16 @@ public class MapsActivity extends AppCompatActivity
                 mFilterSearch = true;
                 item.setIcon(R.drawable.ic_radio_button_checked);
             }
-
         } else if(item.getTitle().equals("Temperature Units")){
             if(mTemperatureUnits){
                 mTemperatureUnits = false;
-                item.setIcon(R.drawable.ic_radio_button_unchecked);
+                item.setIcon(R.drawable.ic_farenheit);
                 if(mWeatherSelection == 0){
                     mWeatherText.setText(Format.celsiusToFahrenheit(mWeather.getTemp()) + mDegrees + "F");
                 }
             } else {
                 mTemperatureUnits = true;
-                item.setIcon(R.drawable.ic_radio_button_checked);
+                item.setIcon(R.drawable.ic_celsius);
                 if(mWeatherSelection == 0){
                     mWeatherText.setText(mWeather.getTemp() + mDegrees + "C");
                 }
@@ -380,14 +379,14 @@ public class MapsActivity extends AppCompatActivity
         } else if (item.getTitle().equals("Wind Units")){
             if(mWindUnits){
                 mWindUnits = false;
-                item.setIcon(R.drawable.ic_radio_button_unchecked);
+                item.setIcon(R.drawable.ic_mps);
                 if(mWeatherSelection == 3){
                     mWeatherText.setText(mWeather.getWindSpeed() + "m/s"
                             + " " + Format.formatWind(mWeather.getWindDeg()));
                 }
             } else {
                 mWindUnits = true;
-                item.setIcon(R.drawable.ic_radio_button_checked);
+                item.setIcon(R.drawable.ic_mph);
                 if(mWeatherSelection == 3){
                     mWeatherText.setText(Format.windMph(mWeather.getWindSpeed()) + "mph"
                             + " " + Format.formatWind(mWeather.getWindDeg()));
@@ -925,15 +924,15 @@ public class MapsActivity extends AppCompatActivity
         }
         settingsSubMenu.add(1, 1, 0, "Temperature Units");
         if(mTemperatureUnits){
-            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_checked);
+            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_celsius);
         } else{
-            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_radio_button_unchecked);
+            settingsSubMenu.getItem(1).setIcon(R.drawable.ic_farenheit);
         }
         settingsSubMenu.add(1, 2, 0, "Wind Units");
         if(mWindUnits){
-            settingsSubMenu.getItem(2).setIcon(R.drawable.ic_radio_button_checked);
+            settingsSubMenu.getItem(2).setIcon(R.drawable.ic_mph);
         } else{
-            settingsSubMenu.getItem(2).setIcon(R.drawable.ic_radio_button_unchecked);
+            settingsSubMenu.getItem(2).setIcon(R.drawable.ic_mps);
         }
     }
 
