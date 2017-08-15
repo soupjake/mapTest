@@ -1,4 +1,4 @@
-# Weather Radar App (Work in progress)
+# Weather Radar Android App (Work in Progress)
 
 Creating weather radar app by combining Google Maps and OpenWeatherMap API for Master's dissertation. 
 
