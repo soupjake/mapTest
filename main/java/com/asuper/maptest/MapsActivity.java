@@ -843,11 +843,7 @@ public class MapsActivity extends AppCompatActivity
         mWindButton.setImageResource(R.drawable.ic_wind);
 
         //Set scales
-        if(getResources().getConfiguration().orientation == 1){
-            mScalesImage.setImageResource(R.drawable.tempscale);
-        } else if (getResources().getConfiguration().orientation == 2){
-            mScalesImage.setImageResource(R.drawable.tempscaleland);
-        }
+        mScalesImage.setImageResource(R.drawable.tempscale);
         if(mTemperatureUnits){
             mMaxText.setText("50" + mDegrees + "C");
             mMinText.setText("-50" + mDegrees + "C");
@@ -874,11 +870,7 @@ public class MapsActivity extends AppCompatActivity
         mWindButton.setImageResource(R.drawable.ic_wind);
 
         //Set scales
-        if(getResources().getConfiguration().orientation == 1){
-            mScalesImage.setImageResource(R.drawable.cloudscale);
-        } else if (getResources().getConfiguration().orientation == 2){
-            mScalesImage.setImageResource(R.drawable.cloudscaleland);
-        }
+        mScalesImage.setImageResource(R.drawable.cloudscale);
         mMaxText.setText("100%");
         mMinText.setText("0%");
 
@@ -911,11 +903,7 @@ public class MapsActivity extends AppCompatActivity
         mWindButton.setImageResource(R.drawable.ic_wind);
 
         //Set scales
-        if(getResources().getConfiguration().orientation == 1){
-            mScalesImage.setImageResource(R.drawable.precipscale);
-        } else if (getResources().getConfiguration().orientation == 2){
-            mScalesImage.setImageResource(R.drawable.precipscaleland);
-        }
+        mScalesImage.setImageResource(R.drawable.precipscale);
         mMaxText.setText("200mm");
         mMinText.setText("0mm");
 
@@ -944,11 +932,7 @@ public class MapsActivity extends AppCompatActivity
         mWindButton.setImageResource(R.drawable.ic_wind_enabled);
 
         //Set scales
-        if(getResources().getConfiguration().orientation == 1){
-            mScalesImage.setImageResource(R.drawable.windscale);
-        } else if (getResources().getConfiguration().orientation == 2){
-            mScalesImage.setImageResource(R.drawable.windscaleland);
-        }
+        mScalesImage.setImageResource(R.drawable.windscale);
         if(mWindUnits){
             mMaxText.setText("447mph");
             mMinText.setText("0mph");

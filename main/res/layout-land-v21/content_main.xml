@@ -34,7 +34,7 @@
         app:cardCornerRadius="4dp"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/mPlaceHolderTextView1"
+        app:layout_constraintRight_toLeftOf="@+id/mScalesCard"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_constraintLeft_creator="1"
         tools:layout_constraintRight_creator="1">
@@ -44,9 +44,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:padding="16dp"
+            android:padding="8dp"
             android:text="@string/getting_weather"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="14sp" />
 
 
         <TextView
@@ -54,24 +55,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
-            android:padding="16dp"
+            android:padding="8dp"
             android:text=""
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="14sp" />
 
     </android.support.v7.widget.CardView>
-
-    <TextView
-        android:id="@+id/mPlaceHolderTextView1"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:visibility="invisible"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintLeft_toRightOf="@+id/mWeatherCard"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintRight_creator="1" />
 
     <android.support.v7.widget.CardView
         android:id="@+id/mScalesCard"
@@ -80,22 +69,22 @@
         android:layout_margin="16dp"
         app:cardCornerRadius="4dp"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/mPlaceHolderTextView2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/mWeatherCard"
+        app:layout_constraintRight_toRightOf="parent"
         tools:layout_constraintLeft_creator="1">
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:padding="8dp"
             android:gravity="center">
 
             <TextView
-                android:id="@+id/mMaxText"
+                android:id="@+id/mMinText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="8dp"
                 android:text="0"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="14sp" />
@@ -106,13 +95,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:scaleType="fitXY"
-                android:layout_weight="1"
-                android:src="@drawable/tempscaleland" />
+                android:layout_weight="1" />
 
             <TextView
-                android:id="@+id/mMinText"
+                android:id="@+id/mMaxText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="8dp"
                 android:text="0"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="14sp" />
@@ -120,19 +109,6 @@
         </LinearLayout>
 
     </android.support.v7.widget.CardView>
-
-    <TextView
-        android:id="@+id/mPlaceHolderTextView2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:visibility="invisible"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintLeft_toRightOf="@+id/mScalesCard"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintRight_creator="1" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/mTemperatureButton"
