@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -83,8 +84,6 @@ public class MapsActivity extends AppCompatActivity
     //LinkedList to implement FIFO queue for Station locations
     private LinkedList<Station> mStationList;
 
-
-
     // The entry point to Google Play services, used by the Places API and Fused Location Provider.
     private GoogleApiClient mGoogleApiClient;
 
@@ -123,6 +122,11 @@ public class MapsActivity extends AppCompatActivity
     private String mStationName;
     private String mCountryCode;
 
+    //Weather scale variables
+    private ImageView mScalesImage;
+    private TextView mMaxText;
+    private TextView mMinText;
+
     //Variables to set units
     private String mDegrees = "\u00b0";
     private boolean mTemperatureUnits;
@@ -146,6 +150,11 @@ public class MapsActivity extends AppCompatActivity
         //Set weather TextViews
         mDescriptionText = (TextView) findViewById(R.id.mDescriptionText);
         mWeatherText = (TextView) findViewById(R.id.mWeatherText);
+
+        //Set up scales
+        mScalesImage = (ImageView) findViewById(R.id.mScalesImage);
+        mMaxText = (TextView) findViewById(R.id.mMaxText);
+        mMinText = (TextView) findViewById(R.id.mMinText);
 
         //Set up weather Buttons
         mTemperatureButton = (FloatingActionButton) findViewById(R.id.mTemperatureButton);
@@ -368,14 +377,25 @@ public class MapsActivity extends AppCompatActivity
                 item.setIcon(R.drawable.ic_farenheit);
                 if(mWeatherSelection == 0){
                     mWeatherText.setText(Format.celsiusToFahrenheit(mWeather.getTemp()) + mDegrees + "F");
+                    mMaxText.setText("122" + mDegrees + "F");
+                    mMinText.setText("-58" + mDegrees + "F");
                 }
+                //Draw toast to say units being changed
+                Toast toast = Toast.makeText(getApplicationContext(), "Temperature Units: Fahrenheit", Toast.LENGTH_SHORT);
+                toast.show();
             } else {
                 mTemperatureUnits = true;
                 item.setIcon(R.drawable.ic_celsius);
                 if(mWeatherSelection == 0){
                     mWeatherText.setText(mWeather.getTemp() + mDegrees + "C");
+                    mMaxText.setText("50" + mDegrees + "C");
+                    mMinText.setText("-50" + mDegrees + "C");
                 }
+                //Draw toast to say units being changed
+                Toast toast = Toast.makeText(getApplicationContext(), "Temperature Units: Celsius", Toast.LENGTH_SHORT);
+                toast.show();
             }
+
         } else if (item.getTitle().equals("Wind Units")){
             if(mWindUnits){
                 mWindUnits = false;
@@ -383,14 +403,24 @@ public class MapsActivity extends AppCompatActivity
                 if(mWeatherSelection == 3){
                     mWeatherText.setText(mWeather.getWindSpeed() + "m/s"
                             + " " + Format.formatWind(mWeather.getWindDeg()));
+                    mMaxText.setText("200m/s");
+                    mMinText.setText("0m/s");
                 }
+                //Draw toast to say units being changed
+                Toast toast = Toast.makeText(getApplicationContext(), "Wind Units: m/s", Toast.LENGTH_SHORT);
+                toast.show();
             } else {
                 mWindUnits = true;
                 item.setIcon(R.drawable.ic_mph);
                 if(mWeatherSelection == 3){
                     mWeatherText.setText(Format.windMph(mWeather.getWindSpeed()) + "mph"
                             + " " + Format.formatWind(mWeather.getWindDeg()));
+                    mMaxText.setText("447mph");
+                    mMinText.setText("0mph");
                 }
+                //Draw toast to say units being changed
+                Toast toast = Toast.makeText(getApplicationContext(), "Wind Units: mph", Toast.LENGTH_SHORT);
+                toast.show();
             }
         }
 
@@ -812,6 +842,20 @@ public class MapsActivity extends AppCompatActivity
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
         mWindButton.setImageResource(R.drawable.ic_wind);
 
+        //Set scales
+        if(getResources().getConfiguration().orientation == 1){
+            mScalesImage.setImageResource(R.drawable.tempscale);
+        } else if (getResources().getConfiguration().orientation == 2){
+            mScalesImage.setImageResource(R.drawable.tempscaleland);
+        }
+        if(mTemperatureUnits){
+            mMaxText.setText("50" + mDegrees + "C");
+            mMinText.setText("-50" + mDegrees + "C");
+        } else {
+            mMaxText.setText("122" + mDegrees + "F");
+            mMinText.setText("-58" + mDegrees + "F");
+        }
+
     }
 
         //Method to draw cloud info and overlay
@@ -829,6 +873,15 @@ public class MapsActivity extends AppCompatActivity
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
         mWindButton.setImageResource(R.drawable.ic_wind);
 
+        //Set scales
+        if(getResources().getConfiguration().orientation == 1){
+            mScalesImage.setImageResource(R.drawable.cloudscale);
+        } else if (getResources().getConfiguration().orientation == 2){
+            mScalesImage.setImageResource(R.drawable.cloudscaleland);
+        }
+        mMaxText.setText("100%");
+        mMinText.setText("0%");
+
     }
 
     //Method to draw precipitation info and overlay
@@ -841,10 +894,10 @@ public class MapsActivity extends AppCompatActivity
 
         if (mWeather.getRainVolume() != 0.0) {
             precipitation = Format.roundVolume(mWeather.getRainVolume());
-            mWeatherText.setText(precipitation + "mm/3h");
+            mWeatherText.setText(precipitation + getString(R.string.mm3h));
         } else if (mWeather.getSnowVolume() != 0.0) {
             precipitation = Format.roundVolume(mWeather.getSnowVolume());
-            mWeatherText.setText(precipitation + "mm/3h");
+            mWeatherText.setText(precipitation + getString(R.string.mm3h));
         } else {
             mWeatherText.setText("");
         }
@@ -856,6 +909,15 @@ public class MapsActivity extends AppCompatActivity
         mCloudButton.setImageResource(R.drawable.ic_cloud);
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation_enabled);
         mWindButton.setImageResource(R.drawable.ic_wind);
+
+        //Set scales
+        if(getResources().getConfiguration().orientation == 1){
+            mScalesImage.setImageResource(R.drawable.precipscale);
+        } else if (getResources().getConfiguration().orientation == 2){
+            mScalesImage.setImageResource(R.drawable.precipscaleland);
+        }
+        mMaxText.setText("200mm");
+        mMinText.setText("0mm");
 
     }
 
@@ -880,6 +942,20 @@ public class MapsActivity extends AppCompatActivity
         mCloudButton.setImageResource(R.drawable.ic_cloud);
         mPrecipitationButton.setImageResource(R.drawable.ic_precipitation);
         mWindButton.setImageResource(R.drawable.ic_wind_enabled);
+
+        //Set scales
+        if(getResources().getConfiguration().orientation == 1){
+            mScalesImage.setImageResource(R.drawable.windscale);
+        } else if (getResources().getConfiguration().orientation == 2){
+            mScalesImage.setImageResource(R.drawable.windscaleland);
+        }
+        if(mWindUnits){
+            mMaxText.setText("447mph");
+            mMinText.setText("0mph");
+        } else {
+            mMaxText.setText("200m/s");
+            mMinText.setText("0m/s");
+        }
 
     }
 

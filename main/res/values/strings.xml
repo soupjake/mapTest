@@ -10,6 +10,7 @@
     <string name="units">Units</string>
     <string name="filter_search">Filter Search</string>
     <string name="getting_weather">Getting weather…</string>
-    <string name="getting_forecast">Getting forecast…</string>
     <string name="getting_station">Getting station…</string>
+    <string name="mm3h">mm/3h</string>
+    <string name="scalesimage">scalesImage</string>
 </resources>
