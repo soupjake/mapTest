@@ -44,6 +44,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
@@ -74,6 +75,7 @@ public class MapsActivity extends AppCompatActivity
     private static final String TAG = "jakesMessage";
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
+    private Marker mMarker;
 
     //OpenWeatherMap API key
     public final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
@@ -121,6 +123,7 @@ public class MapsActivity extends AppCompatActivity
     private int mWeatherSelection;
     private String mStationName;
     private String mCountryCode;
+    private int mTileSelection;
 
     //Weather scale variables
     private ImageView mScalesImage;
@@ -377,8 +380,8 @@ public class MapsActivity extends AppCompatActivity
                 item.setIcon(R.drawable.ic_farenheit);
                 if(mWeatherSelection == 0){
                     mWeatherText.setText(Format.celsiusToFahrenheit(mWeather.getTemp()) + mDegrees + "F");
-                    mMaxText.setText("122" + mDegrees + "F");
-                    mMinText.setText("-58" + mDegrees + "F");
+                    mMaxText.setText("104" + mDegrees + "F");
+                    mMinText.setText("-40" + mDegrees + "F");
                 }
                 //Draw toast to say units being changed
                 Toast toast = Toast.makeText(getApplicationContext(), "Temperature Units: Fahrenheit", Toast.LENGTH_SHORT);
@@ -388,8 +391,8 @@ public class MapsActivity extends AppCompatActivity
                 item.setIcon(R.drawable.ic_celsius);
                 if(mWeatherSelection == 0){
                     mWeatherText.setText(mWeather.getTemp() + mDegrees + "C");
-                    mMaxText.setText("50" + mDegrees + "C");
-                    mMinText.setText("-50" + mDegrees + "C");
+                    mMaxText.setText("40" + mDegrees + "C");
+                    mMinText.setText("-40" + mDegrees + "C");
                 }
                 //Draw toast to say units being changed
                 Toast toast = Toast.makeText(getApplicationContext(), "Temperature Units: Celsius", Toast.LENGTH_SHORT);
@@ -669,11 +672,13 @@ public class MapsActivity extends AppCompatActivity
                 //Object to hold JSON information
                 JSONObject weatherJSON = new JSONObject(builder.toString());
 
-                //Set nearest weather station's name and shorten if too long
-                weather.setStationName(weatherJSON.getString("name"));
-
-                //Set date as "present"
-                weather.setDate("Present");
+                //Set nearest weather station's name
+                String name = weatherJSON.getString("name");
+                if (name.equals("")){
+                    weather.setStationName("Unknown");
+                } else{
+                    weather.setStationName(name);
+                }
 
                 //Set country's code based on location
                 JSONObject sysObj = weatherJSON.getJSONObject("sys");
@@ -854,7 +859,7 @@ public class MapsActivity extends AppCompatActivity
 
     }
 
-        //Method to draw cloud info and overlay
+    //Method to draw cloud info and overlay
     public void drawCloud() {
 
         //Change mWeatherText to display humidity
