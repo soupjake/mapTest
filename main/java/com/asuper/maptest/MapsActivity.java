@@ -123,7 +123,7 @@ public class MapsActivity extends AppCompatActivity
     private int mWeatherSelection;
     private String mStationName;
     private String mCountryCode;
-    private int mTileSelection;
+    private String mTileType = "";
 
     //Weather scale variables
     private ImageView mScalesImage;
@@ -535,6 +535,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
+        mMap.getUiSettings().setMapToolbarEnabled(false);
 
         if (mLat == 0){
             //Get device's Location
@@ -544,6 +545,7 @@ public class MapsActivity extends AppCompatActivity
 
         } else {
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
+            mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
             getWeather();
         }
 
@@ -611,33 +613,15 @@ public class MapsActivity extends AppCompatActivity
         if (mMap == null) {
             return;
         }
-
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-
-        if (mLocationPermissionGranted) {
-            mMap.clear();
-            mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
-        } else {
-            mLocation = null;
-        }
-
         // Set the map's camera position to the location of the device.
         if (mLat != 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(
                     new LatLng(mLat, mLon)));
+            try{
+                mMarker.setPosition(new LatLng(mLat, mLon));
+            } catch (NullPointerException e){
+                e.printStackTrace();
+            }
         } else {
             Log.d(TAG, "Current location is null. Using defaults.");
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
@@ -823,7 +807,7 @@ public class MapsActivity extends AppCompatActivity
 
     public void drawTileLayer(String tileType){
         mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
+        mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(mLat, mLon)));
         mMap.addTileOverlay(new TileOverlayOptions().tileProvider(createTileProvider(tileType)));
     }
 
@@ -838,8 +822,11 @@ public class MapsActivity extends AppCompatActivity
         } else {
             mWeatherText.setText(Format.celsiusToFahrenheit(mWeather.getTemp()) + mDegrees + "F");
         }
-        //Draw the weather layer
-        drawTileLayer("temp_new");
+        //Draw the weather layer if required
+        if(!mTileType.equals("temp_new")){
+            mTileType = "temp_new";
+            drawTileLayer(mTileType);
+        }
 
         //Set weather FAB images
         mTemperatureButton.setImageResource(R.drawable.ic_thermometer_enabled);
@@ -866,7 +853,11 @@ public class MapsActivity extends AppCompatActivity
         mWeatherSelection = 1;
         mWeatherText.setText(mWeather.getCloudPercentage() + "%");
 
-        drawTileLayer("clouds_new");
+        //Draw the weather layer if required
+        if(!mTileType.equals("clouds_new")){
+            mTileType = "clouds_new";
+            drawTileLayer(mTileType);
+        }
 
         //Set weather FAB images
         mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
@@ -899,7 +890,11 @@ public class MapsActivity extends AppCompatActivity
             mWeatherText.setText("");
         }
 
-        drawTileLayer("precipitation_new");
+        //Draw the weather layer if required
+        if(!mTileType.equals("precipitation_new")){
+            mTileType = "precipitation_new";
+            drawTileLayer(mTileType);
+        }
 
         //Set weather FAB images
         mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
@@ -928,7 +923,11 @@ public class MapsActivity extends AppCompatActivity
                     + " " + Format.formatWind(mWeather.getWindDeg()));
         }
 
-        drawTileLayer("wind_new");
+        //Draw the weather layer if required
+        if(!mTileType.equals("wind_new")){
+            mTileType = "wind_new";
+            drawTileLayer(mTileType);
+        }
 
         //Set weather FAB images
         mTemperatureButton.setImageResource(R.drawable.ic_thermometer);
