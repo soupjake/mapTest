@@ -8,9 +8,19 @@
     <string name="places">Places</string>
     <string name="settings">Settings</string>
     <string name="units">Units</string>
-    <string name="filter_search">Filter Search</string>
     <string name="getting_weather">Getting weather…</string>
     <string name="getting_station">Getting station…</string>
     <string name="mm3h">mm/3h</string>
     <string name="scalesimage">scalesImage</string>
+    <string name="temperature">Temperature</string>
+    <string name="clouds">Clouds</string>
+    <string name="precipitation">Precipitation</string>
+    <string name="wind">Wind</string>
+    <string name="temperatureUnits">Temperature Units</string>
+    <string name="temperatureFahrenheit">Temperature Units: Fahrenheit</string>
+    <string name="temperatureCelsius">Temperature Units: Celsius</string>
+    <string name="windMS">Wind Units: m/s</string>
+    <string name="windMPH">Wind Units: mph</string>
+    <string name="filterSearch">Filter Search</string>
+    <string name="windUnits">Wind Units</string>
 </resources>

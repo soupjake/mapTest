@@ -79,7 +79,7 @@ public class ForecastInstrumentedTest {
         }
 
         assertEquals(condition, test1);
-        assertEquals(condition, test1);
+        assertEquals(condition, test2);
     }
 
 }

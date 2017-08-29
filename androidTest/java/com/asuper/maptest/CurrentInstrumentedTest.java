@@ -32,8 +32,10 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class CurrentInstrumentedTest{
 
-    String cardiff = "Cathays";
-    String test = "";
+    String name = "Cathays";
+    String nameTest = "";
+    String condition = "Clouds";
+    String conditionTest = "";
     double mLat = 51.48686;
     double mLon = -3.2137181;
     public final String APP_ID = "69be65f65a5fabd4d745d0544b7b771e";
@@ -61,14 +63,19 @@ public class CurrentInstrumentedTest{
 
             //Object to hold JSON information
             JSONObject weatherJSON = new JSONObject(builder.toString());
-            test = weatherJSON.getString("name");
+            nameTest = weatherJSON.getString("name");
+
+            JSONArray weatherArray = weatherJSON.getJSONArray("weather");
+            JSONObject weatherObj = weatherArray.getJSONObject(0);
+            conditionTest = weatherObj.getString("main");
 
             urlConnection.disconnect();
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
 
-        assertEquals(cardiff, test);
+        assertEquals(name, nameTest);
+        assertEquals(condition, conditionTest);
     }
 
 }

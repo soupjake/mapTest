@@ -38,7 +38,8 @@ public class LocationInstrumentedTest {
 
         LocationManager locationManager = (LocationManager) appContext.getSystemService(Context.LOCATION_SERVICE);
         locationManager.removeTestProvider("Test");
-        locationManager.addTestProvider("Test", false, false, false, false, false, false, false, Criteria.POWER_LOW, Criteria.ACCURACY_FINE);
+        locationManager.addTestProvider("Test", false, false, false, false, false, false, false,
+                Criteria.POWER_LOW, Criteria.ACCURACY_FINE);
         locationManager.setTestProviderEnabled("Test", true);
 
         Location location = new Location("Test");

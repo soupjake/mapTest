@@ -19,7 +19,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -169,7 +168,7 @@ public class MapsActivity extends AppCompatActivity
                     public void onClick(View v) {
                         drawTemperature();
                         //Draw toast to say weather type being displayed
-                        Toast toast = Toast.makeText(getApplicationContext(), "Temperature", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplicationContext(), R.string.temperature, Toast.LENGTH_SHORT);
                         toast.show();
                     }
                 }
@@ -183,7 +182,7 @@ public class MapsActivity extends AppCompatActivity
                     public void onClick(View v) {
                         drawCloud();
                         //Draw toast to say weather type being displayed
-                        Toast toast = Toast.makeText(getApplicationContext(), "Clouds", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplicationContext(), R.string.clouds, Toast.LENGTH_SHORT);
                         toast.show();
                     }
                 }
@@ -197,7 +196,7 @@ public class MapsActivity extends AppCompatActivity
                     public void onClick(View v) {
                         drawPrecipitation();
                         //Draw toast to say weather type being displayed
-                        Toast toast = Toast.makeText(getApplicationContext(), "Precipitation", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplicationContext(), R.string.precipitation, Toast.LENGTH_SHORT);
                         toast.show();
                     }
                 }
@@ -211,7 +210,7 @@ public class MapsActivity extends AppCompatActivity
                     public void onClick(View v) {
                         drawWind();
                         //Draw toast to say weather type being displayed
-                        Toast toast = Toast.makeText(getApplicationContext(), "Wind", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplicationContext(), R.string.wind, Toast.LENGTH_SHORT);
                         toast.show();
                     }
                 }
@@ -367,7 +366,7 @@ public class MapsActivity extends AppCompatActivity
             updateLocationUI();
             getWeather();
             drawer.closeDrawer(GravityCompat.START);
-        } else if(item.getTitle().equals("Filter Search")){
+        } else if(item.getTitle().equals(getString(R.string.filterSearch))){
             if(mFilterSearch){
                 mFilterSearch = false;
                 item.setIcon(R.drawable.ic_radio_button_unchecked);
@@ -375,7 +374,7 @@ public class MapsActivity extends AppCompatActivity
                 mFilterSearch = true;
                 item.setIcon(R.drawable.ic_radio_button_checked);
             }
-        } else if(item.getTitle().equals("Temperature Units")){
+        } else if(item.getTitle().equals(getString(R.string.temperatureUnits))){
             if(mTemperatureUnits){
                 mTemperatureUnits = false;
                 item.setIcon(R.drawable.ic_farenheit);
@@ -385,7 +384,7 @@ public class MapsActivity extends AppCompatActivity
                     mMinText.setText("-40" + mDegrees + "F");
                 }
                 //Draw toast to say units being changed
-                Toast toast = Toast.makeText(getApplicationContext(), "Temperature Units: Fahrenheit", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), R.string.temperatureFahrenheit, Toast.LENGTH_SHORT);
                 toast.show();
             } else {
                 mTemperatureUnits = true;
@@ -396,11 +395,11 @@ public class MapsActivity extends AppCompatActivity
                     mMinText.setText("-40" + mDegrees + "C");
                 }
                 //Draw toast to say units being changed
-                Toast toast = Toast.makeText(getApplicationContext(), "Temperature Units: Celsius", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), R.string.temperatureCelsius, Toast.LENGTH_SHORT);
                 toast.show();
             }
 
-        } else if (item.getTitle().equals("Wind Units")){
+        } else if (item.getTitle().equals(getString(R.string.windUnits))){
             if(mWindUnits){
                 mWindUnits = false;
                 item.setIcon(R.drawable.ic_mps);
@@ -411,7 +410,7 @@ public class MapsActivity extends AppCompatActivity
                     mMinText.setText("0m/s");
                 }
                 //Draw toast to say units being changed
-                Toast toast = Toast.makeText(getApplicationContext(), "Wind Units: m/s", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), R.string.windMS, Toast.LENGTH_SHORT);
                 toast.show();
             } else {
                 mWindUnits = true;
@@ -423,7 +422,7 @@ public class MapsActivity extends AppCompatActivity
                     mMinText.setText("0mph");
                 }
                 //Draw toast to say units being changed
-                Toast toast = Toast.makeText(getApplicationContext(), "Wind Units: mph", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), R.string.windMPH, Toast.LENGTH_SHORT);
                 toast.show();
             }
         }
@@ -972,7 +971,7 @@ public class MapsActivity extends AppCompatActivity
         menu.clear();
         if(mStationList.size() != 0){
             int order = 0;
-            SubMenu placeSubMenu = menu.addSubMenu("Places");
+            SubMenu placeSubMenu = menu.addSubMenu(R.string.places);
             for(int listItem = mStationList.size()-1; listItem >= 0; listItem--){
                 placeSubMenu.add(0, listItem, order, mStationList.get(listItem).getStationName());
                 placeSubMenu.getItem(order).setIcon(R.drawable.ic_place);
@@ -980,20 +979,20 @@ public class MapsActivity extends AppCompatActivity
             }
         }
 
-        SubMenu settingsSubMenu = menu.addSubMenu("Settings");
-        settingsSubMenu.add(1, 0, 0, "Filter Search");
+        SubMenu settingsSubMenu = menu.addSubMenu(R.string.settings);
+        settingsSubMenu.add(1, 0, 0, R.string.filterSearch);
         if(mFilterSearch){
             settingsSubMenu.getItem(0).setIcon(R.drawable.ic_radio_button_checked);
         } else{
             settingsSubMenu.getItem(0).setIcon(R.drawable.ic_radio_button_unchecked);
         }
-        settingsSubMenu.add(1, 1, 0, "Temperature Units");
+        settingsSubMenu.add(1, 1, 0, R.string.temperatureUnits);
         if(mTemperatureUnits){
             settingsSubMenu.getItem(1).setIcon(R.drawable.ic_celsius);
         } else{
             settingsSubMenu.getItem(1).setIcon(R.drawable.ic_farenheit);
         }
-        settingsSubMenu.add(1, 2, 0, "Wind Units");
+        settingsSubMenu.add(1, 2, 0, R.string.windUnits);
         if(mWindUnits){
             settingsSubMenu.getItem(2).setIcon(R.drawable.ic_mph);
         } else{
