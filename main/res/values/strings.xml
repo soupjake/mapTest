@@ -23,4 +23,7 @@
     <string name="windMPH">Wind Units: mph</string>
     <string name="filterSearch">Filter Search</string>
     <string name="windUnits">Wind Units</string>
+    <string name="nolocation">No location found!</string>
+    <string name="locationMessage">Make sure GPS services are enabled on your device and try again.</string>
+    <string name="ok">OK</string>
 </resources>

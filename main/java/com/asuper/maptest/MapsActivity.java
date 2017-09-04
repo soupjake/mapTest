@@ -1,6 +1,7 @@
 package com.asuper.maptest;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,10 +12,12 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
@@ -599,8 +602,15 @@ public class MapsActivity extends AppCompatActivity
                 mLat = mLocation.getLatitude();
                 mLon = mLocation.getLongitude();
             } catch (Exception e){
-                mLat = mDefaultLocation.latitude;
-                mLon = mDefaultLocation.longitude;
+                AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+                builder.setTitle(R.string.nolocation);
+                builder.setMessage(R.string.locationMessage);
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
             }
 
         }
@@ -623,7 +633,6 @@ public class MapsActivity extends AppCompatActivity
                 e.printStackTrace();
             }
         } else {
-            Log.d(TAG, "Current location is null. Using defaults.");
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     mDefaultLocation, DEFAULT_ZOOM));
         }
